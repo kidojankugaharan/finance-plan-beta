@@ -23,6 +23,18 @@ async function build() {
   });
 }
 
+export async function importTesterBackup(page, file) {
+  // Intercept native dialogs if the browser emits them, but select through the
+  // input itself: native picker events are not reliable in every runner session.
+  const suppressPicker = () => {};
+  page.on('filechooser', suppressPicker);
+  try {
+    await page.getByRole('button', {name: 'Import JSON backup', exact: true}).click();
+    await page.locator('input[type="file"]').setInputFiles(file);
+    await page.getByRole('dialog').waitFor({state: 'visible'});
+  } finally { page.off('filechooser', suppressPicker); }
+}
+
 export async function startTester(personaId, {acceptance = false, profileName = 'agent', skipBuild = false} = {}) {
   // Resolve all artifacts from this repository, regardless of the caller's cwd.
   if (path.resolve(process.cwd()) !== path.resolve(root)) throw new Error('Run from the project root.');
@@ -106,10 +118,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
           case 'import': {
             const file = inside(directory, input.file);
             if (path.extname(file) !== '.json') throw new Error('Choose a JSON backup.');
-            const event = page.waitForEvent('filechooser');
-            await page.getByRole('button', {name: 'Import JSON backup', exact: true}).click();
-            await (await event).setFiles(file);
-            await page.getByRole('dialog').waitFor({state: 'visible'});
+            await importTesterBackup(page, file);
             result = 'Preview opened; inspect it, then click Import this plan.'; break;
           }
           case 'note': result = String(input.text); break;

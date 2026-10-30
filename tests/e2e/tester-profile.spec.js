@@ -4,6 +4,61 @@ import {openTesterPage, checkpointTesterPage} from '../../scripts/tester-profile
 import {freshPlan, STORAGE_KEY} from '../../src/state.js';
 import {createEngine} from '../../src/engine/index.js';
 import {closeMonth} from '../../src/closeout.js';
+import {importTesterBackup} from '../../scripts/tester-run.mjs';
+
+for (const nativePicker of [true, false]) test(`harness imports an exported backup (${nativePicker ? 'native chooser' : 'no chooser event'})`, async ({}, info) => {
+  const temp = info.outputPath('temp');
+  await fs.mkdir(temp, {recursive: true});
+  const context = await chromium.launchPersistentContext(info.outputPath('profile'), {
+    ...devices['iPhone 13'], headless: true, acceptDownloads: true, serviceWorkers: 'block',
+    env: {...process.env, TEMP: temp, TMP: temp, TMPDIR: temp},
+  });
+  try {
+    const page = context.pages()[0];
+    page.setDefaultTimeout(10000);
+    // Reproduce the harness failure independently of the host's native picker:
+    // the Import button creates its input, but no filechooser event is emitted.
+    if (!nativePicker) await page.addInitScript(() => {
+      HTMLInputElement.prototype.showPicker = function () {};
+    });
+    await page.goto('http://127.0.0.1:4173/finance-plan-beta/');
+    let state = createEngine({...freshPlan(), baseYear: 2026}).state;
+    state.nameA = 'Taylor';
+    state.setup = {started: true, completed: true, seen: {}, step: 6};
+    state.budgetItems = [{expense: 'Housing', category: 'Home', cost: 1500, owner: 'A', recurrenceType: 'monthly', startDate: '', endDate: ''}];
+    state.goals = [{description: 'Emergency fund', goalKey: 'customSavings', targetAmount: 3000, targetYear: 2027, targetMonth: 11, achievementMode: 'dedicated', active: true}];
+    closeMonth(state, 2026, 0, 'Keep a monthly cushion.', new Date(2026, 1, 2));
+    state = createEngine(state).state;
+    await page.evaluate(({key, state}) => localStorage.setItem(key, JSON.stringify({state, history: []})), {key: STORAGE_KEY, state});
+    await page.reload();
+    await page.locator('[data-tab="more"]').click();
+    const event = page.waitForEvent('download');
+    await page.getByRole('button', {name: 'Export JSON backup', exact: true}).click();
+    const download = await event;
+    const file = info.outputPath(download.suggestedFilename());
+    await download.saveAs(file);
+    const backup = JSON.parse(await fs.readFile(file, 'utf8'));
+    // Import must replace a different current plan, only after confirmation.
+    const current = freshPlan();
+    current.nameA = 'Current household';
+    current.setup = state.setup;
+    await page.evaluate(({key, state}) => localStorage.setItem(key, JSON.stringify({state, history: []})), {key: STORAGE_KEY, state: current});
+    await page.reload();
+    const saved = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
+    const chooserListeners = page.listenerCount('filechooser');
+    await importTesterBackup(page, file);
+    expect(page.listenerCount('filechooser')).toBe(chooserListeners);
+    await expect(page.getByRole('dialog')).toContainText('Taylor');
+    await expect(page.getByRole('dialog')).toContainText('1 regular expenses and 1 goals');
+    expect(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY)).toBe(saved);
+    await page.getByRole('button', {name: 'Import this plan', exact: true}).click();
+    const restored = await page.evaluate(key => JSON.parse(localStorage.getItem(key)).state, STORAGE_KEY);
+    expect(restored).toEqual(backup.state);
+    expect(restored.years[0].months[0].locked).toBe(true);
+    expect(restored.lessons[0].note).toBe('Keep a monthly cushion.');
+    await expect(page.locator('input[type="file"]')).toHaveCount(0);
+  } finally { await context.close(); }
+});
 
 test('household checkpoint survives an origin change and repeated full profile restarts', async ({}, info) => {
   const directory = info.outputPath('persistent-profile');
