@@ -195,13 +195,27 @@ test('Review setup shows saved assumptions without changing a completed plan',as
   expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
 });
 
+test('mortgage projection visibly identifies tracked balances on phone (#80)',async({page})=>{
+  await setupPlan(page);
+  await expect(page.locator('.wealth-hero')).toContainText('Bank + investments, year end');
+  for(const tab of ['year','analysis']){
+    await nav(page,tab);
+    const notice=page.locator('main .tracked-balance-notice');
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText('not full household net worth');
+    await expect(notice).toContainText('principal reduction, interest and home equity are not calculated');
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+  }
+  await expect(page.getByRole('columnheader',{name:'Bank + investments',exact:true})).toBeVisible();
+});
+
 test('debt payments disclose expense-only tracking before entry and after saving',async({page})=>{
   await setupPlan(page);
   await nav(page,'budget');
   const notice=page.locator('main .debt-notice');
   await expect(notice).toContainText('Debt payments are expenses only.');
   await expect(notice).toContainText('does not track debt balances, interest, principal repayments, or payoff dates');
-  await expect(notice).toContainText('Debts are not subtracted from net worth');
+  await expect(notice).toContainText('it is not full household net worth');
   await page.getByRole('button',{name:'+ Debt',exact:true}).click();
   const dialog=page.getByRole('dialog');
   await expect(dialog.locator('.debt-notice')).toHaveText(await notice.textContent());

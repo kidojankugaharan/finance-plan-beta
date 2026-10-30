@@ -52,5 +52,7 @@ export function chart(rows,key='netWorth') {
   const values=rows.map(r=>Number(r[key])||0),lo=Math.min(0,...values),hi=Math.max(1,...values),w=760,h=220;
   const y=v=>h-20-(v-lo)/(hi-lo)*(h-40);
   const points=values.map((v,i)=>`${20+i*(w-40)/Math.max(1,values.length-1)},${y(v)}`).join(' ');
-  return `<figure class="chart"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${escape(key)} from ${rows[0].year} to ${rows.at(-1).year}, ending at ${money(values.at(-1))}"><line x1="20" x2="740" y1="${y(0)}" y2="${y(0)}" stroke="#686184" stroke-dasharray="4 4"/><polyline points="${points}" fill="none" stroke="#5de4dc" stroke-width="3" stroke-linejoin="round"/></svg><figcaption><span>${rows[0].year}</span><span>${money(lo)} to ${money(hi)}</span><span>${rows.at(-1).year}</span></figcaption></figure>`;
+  return `<figure class="chart"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${escape(key==='netWorth'?'Bank + investments':key)} from ${rows[0].year} to ${rows.at(-1).year}, ending at ${money(values.at(-1))}"><line x1="20" x2="740" y1="${y(0)}" y2="${y(0)}" stroke="#686184" stroke-dasharray="4 4"/><polyline points="${points}" fill="none" stroke="#5de4dc" stroke-width="3" stroke-linejoin="round"/></svg><figcaption><span>${rows[0].year}</span><span>${money(lo)} to ${money(hi)}</span><span>${rows.at(-1).year}</span></figcaption></figure>`;
 }
+
+export const trackedBalanceNotice = '<p class="hint tracked-balance-notice">Bank + investments includes bank, TFSA and RRSP/RRIF balances before withdrawal tax. It excludes property and debt balances, so it is not full household net worth. Mortgage and other debt payments count in full as cash expenses; principal reduction, interest and home equity are not calculated. Track those separately.</p>';

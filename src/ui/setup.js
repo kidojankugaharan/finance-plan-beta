@@ -15,7 +15,7 @@ export function readHousehold(s,d) {
   if(s.ui.analysis)for(const key of ['from','to'])if(s.ui.analysis[key]!==undefined)s.ui.analysis[key]=Math.max(s.baseYear,s.ui.analysis[key]);
 }
 export function balanceFields(s) {
-  return `<p>Enter balances at <strong>January 1, ${s.baseYear}</strong>. Use a year-start statement. Current balances would count this year’s earnings twice.</p><div class="fields">${people(s).map(p=>['Cash','TFSA','RRSP'].map(a=>field(`start${a==='Cash'?'Cash':a}${p}`,`${name(s,p)} · ${a==='Cash'?'Bank balance':a}`,s[`start${a}${p}`],{required:true})).join('')).join('')}</div><p class="hint">All amounts are Canadian dollars. Money you enter is rounded to whole dollars. Debt balances are outside this plan and are not subtracted from net worth. Enter debt payments as Budget expenses; they do not track or pay down a debt balance.</p>`;
+  return `<p>Enter balances at <strong>January 1, ${s.baseYear}</strong>. Use a year-start statement. Current balances would count this year’s earnings twice.</p><div class="fields">${people(s).map(p=>['Cash','TFSA','RRSP'].map(a=>field(`start${a==='Cash'?'Cash':a}${p}`,`${name(s,p)} · ${a==='Cash'?'Bank balance':a}`,s[`start${a}${p}`],{required:true})).join('')).join('')}</div><p class="hint">All amounts are Canadian dollars. Money you enter is rounded to whole dollars. Property and debt balances are outside this plan. The bank + investments total is not full household net worth. Enter debt payments as Budget expenses; they do not track or pay down a debt balance.</p>`;
 }
 export function readBalances(s,d) {for(const p of people(s))for(const a of ['Cash','TFSA','RRSP'])s[`start${a}${p}`]=numberValue(d[`start${a}${p}`],{whole:true});}
 function stopWorkAge(s,p) {
