@@ -100,3 +100,39 @@ test('unassessed sabbatical explains how to assess a separate savings schedule',
   assert.doesNotMatch(html,/Household net worth|Projected metric at target date|<progress|target met/);
   assert.equal(JSON.stringify(e.state),before);
 });
+
+// Issue #89: existing zero schedules must make the funding amount apparent.
+test.each([
+  [0,'monthly',0,'$312.50',48],
+  [3000,'monthly',0,'$250.00',48],
+  [3000,'quarterly',0,'$750.00',16],
+  [0,'monthly',2,'$326.09',46]
+])('education goal shows required contributions without changing saved funding (%s, %s, %s closed)',(startingAmount,frequency,closed,amount,count)=>{
+  const e=createEngine({baseYear:2026,goals:[{
+    goalKey:'educationFund',goalType:'saving',description:'Education savings',
+    targetAmount:15000,targetYear:2029,targetMonth:11,achievementMode:'dedicated',
+    fundingPlan:{startingAmount,frequency,amountMode:'fixed',amount:0,startYear:2026,startMonth:0}
+  }]});
+  for(let i=0;i<closed;i++)e.state.years[0].months[i].locked=true;
+  const result={goals:e.computeGoalResults()},before=JSON.stringify(e.state);
+  const html=goals.render({engine:e,state:e.state,result});
+  assert.ok(html.includes(`Required contribution: ${amount} per payment`));
+  assert.ok(html.includes(`across ${count} payments`));
+  assert.match(html,/to December 2029/);
+  assert.ok(html.includes(`after ${money(startingAmount)} already saved`));
+  assert.match(html,/choose &quot;Divide remaining target across the schedule&quot;/);
+  assert.match(html,/Affordability is not checked; compare with your budget and investment commitments/);
+  assert.match(html,/Contributions are assumed and do not move money in your projection/);
+  assert.ok(html.includes(`Planned savings at target date: ${money(startingAmount)}`));
+  assert.equal(JSON.stringify(e.state),before);
+});
+
+test('education goal with no eligible dates explains how to repair the schedule',()=>{
+  const e=createEngine({baseYear:2026,goals:[{
+    goalKey:'educationFund',goalType:'saving',targetAmount:15000,targetYear:2029,targetMonth:11,
+    achievementMode:'dedicated',fundingPlan:{amountMode:'fixed',amount:0,startYear:2030,startMonth:0}
+  }]});
+  const html=goals.render({engine:e,state:e.state,result:{goals:e.computeGoalResults()}});
+  assert.match(html,/No contribution dates remain before the target/);
+  assert.doesNotMatch(html,/Required contribution:|NaN|Infinity/);
+});

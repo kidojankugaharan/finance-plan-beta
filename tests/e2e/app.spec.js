@@ -467,7 +467,7 @@ test('lessons and closed months round-trip through JSON export and import',async
   await nav(page,'more');await page.getByRole('button',{name:'Lessons learned'}).click();await expect(page.locator('.lessons')).toContainText('Keep a buffer.');
 });
 
-test('sabbatical goal defaults to zero dedicated savings until contributions are entered',async({page})=>{
+test('savings goals calculate contributions by default and preserve fixed amounts',async({page})=>{
   await setupPlan(page);
   await nav(page,'goals');
   await page.getByRole('button',{name:'Add goal',exact:true}).click();
@@ -477,22 +477,23 @@ test('sabbatical goal defaults to zero dedicated savings until contributions are
   await dialog.getByLabel('Target year',{exact:true}).selectOption('2030');
   await dialog.getByLabel('Target month',{exact:true}).selectOption('11');
   await expect(dialog.getByLabel('How to measure progress')).toHaveValue('dedicated');
-  await expect(dialog.getByLabel('Contribution amount',{exact:true})).toHaveValue('fixed');
+  await expect(dialog.getByLabel('Contribution amount',{exact:true})).toHaveValue('auto');
   await dialog.getByRole('button',{name:'Save changes'}).click();
   const goal=page.locator('.goal-grid .card');
   await expect(goal).toContainText('Dedicated goal savings');
-  await expect(goal).toContainText('Savings plan: Not reached');
-  await expect(goal).toContainText('Planned savings at target date: $0');
+  await expect(goal).toContainText('Savings plan: On track');
+  await expect(goal).toContainText('Planned savings at target date: $45,000');
   await expect(goal).not.toContainText('Household net worth');
   await page.reload();await nav(page,'goals');
-  await expect(goal).toContainText('Planned savings at target date: $0');
+  await expect(goal).toContainText('Planned savings at target date: $45,000');
   await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
+  await dialog.getByLabel('Contribution amount',{exact:true}).selectOption('fixed');
   await dialog.getByLabel('Already saved').fill('5000');
   await dialog.getByLabel('Fixed amount per payment').fill('100');
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(goal).toContainText('Planned savings at target date: $11,000');
   await expect(goal).toContainText('Savings plan: Not reached');
-  // Calculating the contributions needed to meet the target remains an explicit option.
+  // Fixed contributions remain unchanged until the user chooses the calculation.
   await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
   await dialog.getByLabel('Contribution amount',{exact:true}).selectOption('auto');
   await dialog.getByRole('button',{name:'Save changes'}).click();
@@ -731,4 +732,28 @@ test('tracker controls preserve projections, filter expenses, and switch salary 
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state.raiseA)).toBe(3);
   await page.getByLabel('Edit income for 2027',{exact:true}).click();
   await expect(dialog.getByRole('heading')).toHaveText('Income for 2027');
+});
+
+test('education goal offers a monthly funding amount and saves the chosen calculation (#89)',async({page})=>{
+  await setupPlan(page);
+  const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state);
+  state.goals=[{description:'Education savings',goalKey:'educationFund',goalType:'saving',targetAmount:15000,targetYear:2029,targetMonth:11,achievementMode:'dedicated',fundingPlan:{startingAmount:0,amountMode:'fixed',amount:0,frequency:'monthly',startYear:2026,startMonth:0,endYear:2029,endMonth:11}}];
+  await page.evaluate(state=>localStorage.setItem('finance-plan-beta.v1',JSON.stringify({state,history:[]})),state);
+  await page.reload();await nav(page,'goals');
+  const goal=page.locator('.goal-grid .card'),dialog=page.getByRole('dialog');
+  await expect(goal).toContainText('Planned savings at target date: $0');
+  await expect(goal).toContainText('Required contribution: $312.50 per payment (Monthly), across 48 payments');
+  await expect(goal).toContainText('Affordability is not checked');
+  await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
+  await expect(dialog.getByLabel('Contribution amount',{exact:true})).toHaveValue('fixed');
+  await dialog.getByLabel('Contribution amount',{exact:true}).selectOption('auto');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(goal).toContainText('Planned savings at target date: $15,000');
+  await expect(goal).toContainText('Contributions are assumed; money is not moved or confirmed saved.');
+  await page.reload();await nav(page,'goals');
+  await expect(goal).toContainText('Planned savings at target date: $15,000');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state);
+  expect(saved.goals[0].fundingPlan.amountMode).toBe('auto');
+  expect(saved.years).toEqual(state.years);
+  expect(saved.budgetItems).toEqual(state.budgetItems);
 });
