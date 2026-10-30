@@ -32,6 +32,11 @@ export async function startTester(personaId, {acceptance = false, profileName = 
   if (!skipBuild) await build();
   const directory = inside(path.join(root, 'testers'), personaId);
   await fs.mkdir(path.join(directory, 'screenshots'), {recursive: true});
+  // Playwright creates launch artifacts in the parent process's temp directory.
+  // The tester sandbox cannot write the Windows user temp directory.
+  const temp = path.join(directory, 'temp');
+  await fs.mkdir(temp, {recursive: true});
+  process.env.TEMP = process.env.TMP = process.env.TMPDIR = temp;
   const runId = new Date().toISOString().replace(/[:.]/g, '-');
   const logFile = path.join(directory, 'run-log.jsonl');
   const log = record => fs.appendFile(logFile, JSON.stringify({at: new Date().toISOString(), runId, ...record}) + '\n');
@@ -128,13 +133,26 @@ export async function startTester(personaId, {acceptance = false, profileName = 
 
 async function main() {
   const [id, ...rawArgs] = process.argv.slice(2);
+  const commandsIndex = rawArgs.indexOf('--commands');
+  const commandsFile = commandsIndex < 0 ? null : rawArgs.splice(commandsIndex, 2)[1];
+  if (commandsIndex >= 0 && !commandsFile) throw new Error('--commands requires a persona-local JSON array file');
   const skipBuild = rawArgs.includes('--skip-build');
   const args = rawArgs.filter(arg => arg !== '--skip-build');
-  if (!id || (args.length && (args.length !== 2 || args[0] !== '--profile'))) throw new Error('Usage: node scripts/tester-run.mjs <persona-id> [--profile <name>] [--skip-build] (JSONL commands on stdin; EOF closes)');
-  const session = await startTester(id, {profileName: args[1] || 'agent', skipBuild});
+  if (!id || (args.length && (args.length !== 2 || args[0] !== '--profile'))) throw new Error('Usage: node scripts/tester-run.mjs <persona-id> [--profile <name>] [--skip-build] [--commands <persona-local JSON array file>] (otherwise JSONL on stdin; EOF closes)');
+  let commands;
+  if (commandsFile) {
+    if (!/^[a-z0-9_-]+$/.test(id || '')) throw new Error('Invalid persona');
+    const directory = path.join(root, 'testers', id);
+    commands = JSON.parse(await fs.readFile(inside(directory, path.relative(directory, path.resolve(root, commandsFile))), 'utf8'));
+    if (!Array.isArray(commands)) throw new Error('Commands file must contain a JSON array');
+  }
+  // Attach stdin before browser startup so piped commands cannot be lost during launch.
+  const lines = commands ? null : readline.createInterface({input: process.stdin, crlfDelay: Infinity});
+  const inputs = commands ? commands.map(command => JSON.stringify(command)) : lines[Symbol.asyncIterator]();
+  const session = await startTester(id, {profileName: args[1] || 'agent', skipBuild}).catch(error => {lines?.close(); throw error;});
   console.log(JSON.stringify({ready: id, profile: session.profileName, commands: ['goto','click','fill','select','text','screenshot','errors','export','import','note','quit']}));
   try {
-    for await (const line of readline.createInterface({input: process.stdin, crlfDelay: Infinity})) {
+    for await (const line of inputs) {
       if (!line.trim()) continue;
       try {
         const input = JSON.parse(line);
@@ -142,6 +160,6 @@ async function main() {
         console.log(JSON.stringify({ok: true, result: await session.command(input)}));
       } catch (error) {console.log(JSON.stringify({ok: false, error: error.message})); process.exitCode = 1;}
     }
-  } finally {await session.close();}
+  } finally {lines?.close(); await session.close();}
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch(error => {console.error(error.message); process.exitCode = 1;});

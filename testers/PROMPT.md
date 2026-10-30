@@ -8,6 +8,8 @@ From the project root run `node scripts/tester-run.mjs <persona-id>`. It builds 
 
 Examples (send each separately and read the result):
 
+If the command runner closes stdin, use file batches instead: write a JSON array (for example `[{"op":"text"},{"op":"errors"}]`) to `testers/<persona-id>/commands.json`, then run `node scripts/tester-run.mjs <persona-id> --skip-build --commands testers/<persona-id>/commands.json` when a shared build is available. Read the output, rewrite the command file, and run the next batch. Each batch opens the persistent profile and closes cleanly. Keep actions depending on transient UI together in one batch (for example import, inspect preview text, confirm import); repeat tab navigation when reopening. The harness stores browser temporary files under the persona's `temp/` directory so sandboxed Windows sessions do not need access to user TEMP. Do not override TEMP/TMP to locations outside the persona directory.
+
 ```json
 {"op":"text"}
 {"op":"click","role":"button","text":"Build my plan"}

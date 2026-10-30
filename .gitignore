@@ -4,6 +4,8 @@ dist/
 testers/*/screenshots/
 testers/*/profile/
 testers/*/downloads/
+testers/*/temp/
+testers/*/commands.json
 *.keystore
 *base64*.txt
 google_client_id.txt

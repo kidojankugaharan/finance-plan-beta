@@ -2,8 +2,10 @@ import {describe, it, expect, vi} from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {Loop, ROOT, options, pool, selectIssues, branchFor, codexArgs} from '../scripts/loop.mjs';
+import {groupOpenIssues} from '../scripts/file-issues.mjs';
+import {retryGitHub} from '../scripts/github-retry.mjs';
 
-const issue = (number, type = 'bug') => ({number, title: 'A tester finding', body: 'Evidence', created_at: `2026-10-${String(number).padStart(2, '0')}`, labels: [{name: 'tester'}, {name: type}]});
+const issue = (number, type = 'bug') => ({number, title: `A tester finding ${number}`, body: 'Evidence', created_at: `2026-10-${String(number).padStart(2, '0')}`, labels: [{name: 'tester'}, {name: type}]});
 const summary = () => ({round: 1, filed: [], merged: [], needsHuman: [], backlog: []});
 
 async function fixture(run, args = ['fix']) {
@@ -43,6 +45,101 @@ function fakeFix({issues = [issue(4)], failTests = 0, pending = false, previous 
 }
 
 describe('auto-development loop', () => {
+  it.each(['remote: Internal Server Error', 'GraphQL: Something went wrong', 'HTTP 503: Service Unavailable', 'server returned error: 502'])('backs off three times for %s', async message => {
+    const task = vi.fn().mockRejectedValue(new Error(message));
+    const wait = vi.fn();
+    await expect(retryGitHub(task, {wait})).rejects.toThrow(message);
+    expect(task).toHaveBeenCalledTimes(4);
+    expect(wait.mock.calls.map(call => call[0])).toEqual([1000, 2000, 4000]);
+  });
+  it('returns a recovered request and never retries permanent failures', async () => {
+    const wait = vi.fn();
+    const task = vi.fn().mockRejectedValueOnce(new Error('HTTP 500')).mockResolvedValue('ok');
+    expect(await retryGitHub(task, {wait})).toBe('ok');
+    const permanent = vi.fn().mockRejectedValue(new Error('HTTP 403 forbidden'));
+    await expect(retryGitHub(permanent, {wait})).rejects.toThrow('403');
+    expect(permanent).toHaveBeenCalledTimes(1);
+  });
+  it('retries push and gh without repeating a fixer or a local command', async () => {
+    const run = vi.fn().mockRejectedValueOnce(new Error('Internal Server Error')).mockResolvedValue('ok');
+    const loop = await fixture(run);
+    expect(await loop.command('git', ['push', 'origin', 'branch'])).toBe('ok');
+    run.mockRejectedValueOnce(new Error('GraphQL: Something went wrong'));
+    expect(await loop.command('gh', ['pr', 'view', '1'])).toBe('ok');
+    run.mockRejectedValueOnce(new Error('Internal Server Error'));
+    await expect(loop.command('codex', [])).rejects.toThrow();
+    expect(run).toHaveBeenCalledTimes(5);
+  });
+  it('groups the observed cross-persona defects while keeping other symptoms separate', () => {
+    const findings = [
+      {...issue(9), title: 'Closed January is omitted from annual totals'},
+      {...issue(5), title: 'Closing a month removes its expenses from Year totals'},
+      {...issue(8), title: 'Down payment goal measures net worth and is marked achieved'},
+      {...issue(10), title: 'Home improvement goal uses net worth', body: 'Actual: target met'},
+      {...issue(11), title: 'Assumptions choice has no associated accessible label'},
+      {...issue(12), title: 'Assumption choice cannot be selected by its visible prompt'},
+      {...issue(13), title: 'Annual totals wrong because salary override ignored'},
+      {...issue(14), title: 'Goal net worth graph is blank'}
+    ];
+    expect(groupOpenIssues(findings).map(group => group.map(i => i.number))).toEqual([[5, 9], [8, 10], [11, 12], [13], [14]]);
+  });
+  it('fixes a duplicate group once and closes duplicates only after confirmed merge', async () => {
+    const duplicates = [issue(4), {...issue(5), title: issue(4).title}];
+    const fake = fakeFix({issues: duplicates});
+    const loop = await fixture(fake.run, ['fix', '--max-fixes', '1']);
+    await loop.fix(summary());
+    expect(fake.calls.filter(c => c.name === 'codex')).toHaveLength(1);
+    const close = fake.calls.findIndex(c => c.name === 'gh' && c.args[1] === 'close');
+    const merged = fake.calls.findIndex(c => c.name === 'gh' && c.args[1] === 'view');
+    expect(close).toBeGreaterThan(merged);
+    const comment = fake.calls.find(c => c.name === 'gh' && c.args[1] === 'comment');
+    expect(await fs.readFile(comment.args.at(-1), 'utf8')).toBe('Duplicate of #4');
+    const pending = fakeFix({issues: duplicates, pending: true});
+    await (await fixture(pending.run)).fix(summary());
+    expect(pending.calls.some(c => c.name === 'gh' && c.args[1] === 'close')).toBe(false);
+  });
+  it('recovers transient push and PR creation failures without rerunning the fix', async () => {
+    const fake = fakeFix();
+    const attempts = {push: 0, create: 0};
+    const run = vi.fn(async (name, args, settings) => {
+      const operation = name === 'git' && args[0] === 'push' ? 'push' : name === 'gh' && args[0] === 'pr' && args[1] === 'create' ? 'create' : null;
+      if (operation && attempts[operation]++ < 3) throw new Error(operation === 'push' ? 'remote: Internal Server Error' : 'GraphQL: Something went wrong');
+      return fake.run(name, args, settings);
+    });
+    const loop = await fixture(run);
+    const result = summary();
+    await loop.fix(result);
+    expect(attempts).toEqual({push: 4, create: 4});
+    expect(result.needsHuman).toEqual([]);
+    expect(result.merged).toHaveLength(1);
+    expect(fake.calls.filter(call => call.name === 'codex')).toHaveLength(1);
+  });
+  it('keeps triaged issues out of the fix queue but closes their duplicate after an eligible fix merges', async () => {
+    const older = issue(4);
+    older.labels.push({name: 'needs-human'});
+    const newer = {...issue(5), title: older.title};
+    const fake = fakeFix({issues: [older, newer]});
+    const loop = await fixture(fake.run);
+    await loop.fix(summary());
+    expect(fake.calls.find(call => call.name === 'codex').input).toContain('Fix tester issue #5');
+    expect(fake.calls.find(call => call.name === 'gh' && call.args[1] === 'close').args[2]).toBe('4');
+  });
+  it('retries a failed Light persona on sol low and files only validated reports', async () => {
+    const loop = await fixture(vi.fn().mockResolvedValue('LOOP_SUMMARY {"filed":[]}'), ['round']);
+    loop.personas.push({id: 'two'});
+    loop.testPersona = vi.fn(async (persona, model) => {
+      if (persona.id === 'two' || model === 'gpt-6-luna') throw new Error('no completed fresh tester session');
+    });
+    const result = summary();
+    await loop.round(result);
+    expect(loop.testPersona.mock.calls.filter(call => call[0].id === 'one').map(call => call[1])).toEqual(['gpt-6-luna', 'gpt-6.1-sol']);
+    expect(loop.completedPersonas).toEqual(['one']);
+    expect(result.skipped).toEqual([{persona: 'two', reason: expect.stringContaining('gpt-6.1-sol: no completed')}]);
+    await loop.file();
+    expect(loop.run.mock.calls.at(-1)[1].slice(-2)).toEqual(['--personas', 'one']);
+    await loop.record(result);
+    expect(await fs.readFile(path.join(loop.root, 'testers/ROUNDS.md'), 'utf8')).toContain('Skipped personas: two:');
+  });
   it('validates options and preserves the required models/sandbox', () => {
     expect(options(['all'])).toEqual({mode: 'all', dryRun: false, only: null, maxFixes: 5, maxRounds: 3});
     expect(options(['round', '--only', 'on-student', '--max-fixes', '2', '--max-rounds', '1', '--dry-run']).maxFixes).toBe(2);
@@ -214,6 +311,31 @@ describe('auto-development loop', () => {
     expect(run).toHaveBeenCalledTimes(2);
     expect(run.mock.calls[0][1]).toEqual(['run', 'build']);
     expect(run.mock.calls[1][2].input).toContain('one --skip-build');
+  });
+  it('recovers a missing Light log with a real fallback validation pass', async () => {
+    let loop;
+    const run = vi.fn(async (name, args) => {
+      if (name !== 'codex' || args.includes('gpt-6-luna')) return '';
+      const directory = path.join(loop.root, 'testers/one');
+      await fs.appendFile(path.join(directory, 'run-log.jsonl'), [
+        {kind: 'start', persona: 'one', runId: 'fallback'},
+        {kind: 'command', runId: 'fallback'},
+        {kind: 'end', runId: 'fallback'}
+      ].map(record => JSON.stringify(record)).join('\n') + '\n');
+      await fs.writeFile(path.join(directory, 'issues.md'), '# Issues\nNo current findings.\n');
+      return 'Completed fallback';
+    });
+    loop = await fixture(run, ['round']);
+    const result = summary();
+    await loop.round(result);
+    const testers = run.mock.calls.filter(call => call[0] === 'codex');
+    expect(testers).toHaveLength(2);
+    expect(testers[1][1]).toContain('gpt-6.1-sol');
+    expect(testers[1][1]).toContain('model_reasoning_effort="low"');
+    expect(testers[1][2].input).toContain('ENOENT');
+    expect(testers[1][2].input).toContain('--commands testers/one/commands.json');
+    expect(loop.completedPersonas).toEqual(['one']);
+    expect(result.skipped).toEqual([]);
   });
   it('preflight rejects a different branch and pending source changes', async () => {
     const run = vi.fn().mockResolvedValueOnce('feature\n');
