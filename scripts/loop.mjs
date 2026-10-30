@@ -255,13 +255,13 @@ export class Loop {
             if (!changed.length) throw new Error('No fix was produced');
             const files = changed.map(line => line.slice(3));
             if (!files.some(file => /^tests\/(?:.*\.(test|spec)\.[cm]?[jt]s|suite\.js)$/.test(file))) throw new Error('A regression test change is required');
-            if (changed.some(line => line.slice(0, 2).includes('D')) || files.some(file => !/^(src\/|tests\/|public\/|scripts\/|docs\/|README\.md$)/.test(file))) throw new Error('Unexpected file changes or deletions; inspect worktree');
+            if (changed.some(line => line.slice(0, 2).includes('D')) || files.some(file => !/^(src\/|tests\/|public\/|scripts\/|docs\/|README\.md$|testers\/PROMPT\.md$)/.test(file))) throw new Error('Unexpected file changes or deletions; inspect worktree');
             failure = null;
             break;
           } catch (error) {failure = error;}
         }
         if (failure) throw failure;
-        await this.command('git', ['add', '--', 'src', 'tests', 'public', 'scripts', 'docs', 'README.md'], {cwd});
+        await this.command('git', ['add', '--', 'src', 'tests', 'public', 'scripts', 'docs', 'README.md', 'testers/PROMPT.md'], {cwd});
         await this.command('git', [...identity, 'commit', '-m', `Fix tester issue #${issue.number}`], {cwd});
         await this.command('git', ['push', '-u', 'origin', branch], {cwd});
         const bodyFile = await this.write(`prs/${this.runId}-${issue.number}.md`, `Fixes #${issue.number}\n\nAddresses the tester report and adds a regression test.\n\nValidation: npm test; npm run test:e2e; npm run build.\n`);

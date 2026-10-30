@@ -5,6 +5,7 @@ import {spawn} from 'node:child_process';
 import readline from 'node:readline';
 import {chromium, devices} from '@playwright/test';
 import {createPreviewServer} from './serve-dist.mjs';
+import {openTesterPage,checkpointTesterPage} from './tester-profile.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const inside = (base, relative) => {
@@ -68,7 +69,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
     page.on('pageerror', error => {const entry = {kind: 'pageerror', message: error.message}; errors.push(entry); eventLog(entry);});
     page.on('console', message => {if (message.type() === 'error') {const entry = {kind: 'console-error', message: message.text()}; errors.push(entry); eventLog(entry);}});
     await log({kind: 'start', persona: personaId, profile: path.relative(directory, profile), viewport: devices['iPhone 13'].viewport, serviceWorkers: 'blocked; offline behavior belongs to e2e suite'});
-    await page.goto(url);
+    await openTesterPage(context, url, profile);
     function locator(command) {
       if (command.label) return page.getByLabel(command.label, {exact: true});
       if (command.role) return page.getByRole(command.role, {name: command.text, exact: true});
@@ -122,8 +123,11 @@ export async function startTester(personaId, {acceptance = false, profileName = 
       }
     }
     return {persona, directory, profileName: path.basename(profile), page, command, close: async () => {
-      await context.close(); await Promise.all([...pendingLogs]);
-      await new Promise(resolve => server.close(resolve));
+      try { await checkpointTesterPage(page, profile); }
+      finally {
+        await context.close(); await Promise.all([...pendingLogs]);
+        await new Promise(resolve => server.close(resolve));
+      }
       await log({kind: 'end', consoleErrors: errors.length});
     }};
   } catch (error) {
