@@ -1,8 +1,8 @@
-﻿# Issues
+# Issues
 
 ## [idea] Add an employer-pension income source
 Dedupe-key: idea-add-a-dedicated-employer-pension-income-source
-Steps: 1. Open Salary for Robin in 2026. 2. Open Edit this year and inspect Pension settings. 3. Compare available inputs with the brief’s CAD 39,000 annual CPP, OAS and employer pension income.
-Expected: Robin can enter employer pension separately from employment salary and supply known retirement benefits without disguising them as employment.
-Actual: The income editor offers annual salary, growth and stop-work choices. Public pensions offers CPP/QPP start age, OAS start age and CPP/QPP share of maximum, but no employer-pension amount. The saved plan shows CAD 12,239 gross, entirely OAS, and zero CPP/QPP; it does not represent the brief’s CAD 39,000 combined retirement income. Public pensions discloses salary-history estimation and suggests yearly income overrides for pensions received while working. That does not provide a dedicated employer-pension source for this retired household. No pension was entered as salary and no invented benefit split or after-tax proxy was saved.
-Screenshot: testers/nb-pensioner/screenshots/2026-10-30T18-40-21-918Z-rerun-salary.png
+Steps: 1. Open More > Review setup and inspect the saved income. 2. Open Salary and inspect the income sources and pension settings for Robin. 3. Compare available sources with the brief's CAD 39,000 annual CPP, OAS and employer-pension income.
+Expected: Robin can enter employer pension separately from employment salary and represent the stated retirement income without disguising it as employment.
+Actual: The available income editor exposes employee salary and public CPP/QPP and OAS settings, but no employer-pension amount. The persistent plan's take-home income is CAD 12,239 and does not represent the brief's CAD 39,000 combined retirement income. A separately estimated after-tax cash-flow entry or dated Year extra income may be a workaround, but the supplied gross figure does not establish a net amount. No unsupported pension amount or proxy was entered.
+Screenshot: testers/nb-pensioner/screenshots/2026-10-30T19-23-18-128Z-fresh_final_more.png

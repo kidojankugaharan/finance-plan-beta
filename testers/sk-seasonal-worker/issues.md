@@ -1,15 +1,8 @@
-﻿# Issues
+# Issues
 
 ## [idea] Add a seasonal employment income schedule
 Dedupe-key: seasonal-employment-income-schedule-idea
-Steps: 1. Open Casey's plan. 2. Open Salary. 3. Review the controls for entering CAD 48,000 employment income paid mainly April through October.
-Expected: Salary can represent the months when seasonal pay is earned so the monthly projection reflects winter cash needs without manually editing each month.
-Actual: Salary provides annual employee payroll estimates and has no seasonal schedule control. The Year view supports monthly income schedules, but they must be represented there separately from salary.
-Screenshot: testers/sk-seasonal-worker/screenshots/2026-10-30T18-42-21-815Z-salary.png
-
-## [confusing] Annual overview hides seasonal cash shortfalls
-Dedupe-key: annual-overview-hides-seasonal-cash-shortfalls-confusing
-Steps: 1. Open the Year view for Casey's seasonal plan. 2. Compare the annual take-home and expense totals with the month-by-month schedule.
-Expected: The annual summary should make clear that its surplus can coexist with months that have no pay and CAD 2,650 of expenses, since this household depends on a winter income buffer.
-Actual: The overview reports CAD 38,304 take-home against CAD 31,800 expenses, while month details show CAD 0 take-home in February, March, November, and December and CAD 2,650 expenses each month; the bank balance reaches CAD 0 by March before seasonal wages resume. The month schedule contains the timing detail, but the annual summary does not surface this cash timing risk.
-Screenshot: testers/sk-seasonal-worker/screenshots/2026-10-30T18-42-14-519Z-start.png
+Steps: 1. Open Casey's saved 2026 plan. 2. Open Salary and inspect the annual employee salary. 3. Compare it with Year monthly take-home overrides for April through October.
+Expected: A seasonal worker could set paid months directly alongside annual employee salary, with cash timing reflected without manually entering monthly after-tax overrides.
+Actual: Salary accepts annual employee pay, growth, and stop-work settings; seasonal cash timing is represented by monthly take-home overrides in Year. Casey's existing seven $5,472 paid months and five zero-pay months work, and Year explicitly warns of winter shortfalls. This is an enhancement request; no failure of the available override was reproduced.
+Screenshot: testers/sk-seasonal-worker/screenshots/2026-10-30T19-44-54-806Z-rerun_salary.png
