@@ -34,6 +34,28 @@ async function nav(page,tab) {
   }else await page.locator(`[data-tab="${tab}"]`).click();
 }
 
+test('More Explore links open goals and projection when phone tabs are hidden',async({page,isMobile})=>{
+  await setupPlan(page);
+  const navigation=page.getByRole('navigation',{name:'Main navigation'});
+  for(const [tab,title] of [['goals','Goals'],['analysis','Projection & analysis']]){
+    await navigation.getByRole('button',{name:'More',exact:true}).click();
+    if(isMobile)await expect(navigation.locator('[data-tab="'+tab+'"]')).toBeHidden();
+    const link=page.getByRole('link',{name:title,exact:true});
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href','#'+tab);
+    const box=await link.boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(48);
+    if(isMobile)await link.tap();
+    else {await link.focus();await page.keyboard.press('Enter');}
+    await expect(page).toHaveURL(new RegExp('#'+tab+'$'));
+    await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeFocused();
+    await expect(page.getByRole('button',{name:tab==='goals'?'Add goal':'Export projection CSV',exact:true})).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+  }
+});
+
 test('fresh household completes setup, visits every tab, persists, and fits the viewport',async({page},info)=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   await setupPlan(page,{second:true});
