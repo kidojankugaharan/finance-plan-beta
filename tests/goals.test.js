@@ -17,8 +17,8 @@ test.each([
   assert.equal(result.goals[0].status,'Achieved');
   const html=goals.render({engine:e,state:e.state,result});
   assert.match(html,/Funding not assessed/);
-  assert.match(html,/Household net worth/);
-  assert.match(html,/does not show money earmarked or available for this goal/);
+  assert.doesNotMatch(html,/Household net worth/);
+  assert.match(html,/Funding cannot be assessed from household balances alone/);
   assert.match(html,/edit this goal and choose/);
   assert.doesNotMatch(html,/target met|Achieved|<progress|Projected metric at target date/);
   assert.match(html,/Savings toward this goal at target date: Not assessed/);
@@ -49,7 +49,7 @@ test.each([true,false])('down payment does not present general bank cash as goal
   assert.ok(result.goals[0].projectedValue>80000);
   const html=goals.render({engine:e,state:e.state,result});
   assert.match(html,active?/Funding not assessed/:/Paused/);
-  assert.match(html,/Combined bank \/ cash/);
+  assert.doesNotMatch(html,/Combined bank \/ cash/);
   assert.match(html,/Savings toward this goal at target date: Not assessed/);
   assert.match(html,/\$80,000/);
   assert.match(html,/By December 2030/);
@@ -78,4 +78,25 @@ test('intentional wealth milestones keep metric progress',()=>{
   assert.match(html,/Metric: target met/);
   assert.match(html,/Projected metric at target date:/);
   assert.match(html,/<progress/);
+});
+
+// Issue #83: explain the inputs and action needed to assess planned savings.
+test('unassessed sabbatical explains how to assess a separate savings schedule',()=>{
+  const e=createEngine({baseYear:2026,startCashA:100000,startRRSPA:900000,goals:[{
+    goalKey:'customNetWorth',goalType:'other',description:'Sabbatical fund',
+    targetAmount:45000,targetYear:2030,targetMonth:11,achievementMode:'automatic'
+  }]});
+  const before=JSON.stringify(e.state);
+  const html=goals.render({engine:e,state:e.state,result:{goals:e.computeGoalResults()}});
+  assert.match(html,/surplus and investments are not automatically allocated to this goal/);
+  assert.match(html,/compare planned savings with this \$45,000 target by December 2030/);
+  assert.match(html,/edit this goal and choose &quot;A separate planned savings schedule&quot; under &quot;How to measure progress&quot;/);
+  for(const label of ['Already saved','Frequency','Start year','Start month','Fixed amount per payment','Divide remaining target across the schedule']){
+    assert.ok(html.includes(`&quot;${label}&quot;`),`Missing schedule input guidance: ${label}`);
+  }
+  assert.match(html,/Save changes to see whether the scheduled savings meet the target/);
+  assert.match(html,/Affordability is not checked/);
+  assert.match(html,/schedule does not move money in your projection/);
+  assert.doesNotMatch(html,/Household net worth|Projected metric at target date|<progress|target met/);
+  assert.equal(JSON.stringify(e.state),before);
 });
