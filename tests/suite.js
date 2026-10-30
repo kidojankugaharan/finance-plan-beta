@@ -230,9 +230,49 @@ export function registerSuite(test) {
       const after=restored.computeAnnualAggregates()[0];
       for(const key of ['earning','expense','extraNet','netCashFlow','tfsaContrib','rrspContrib','savingsRate'])near(after[key],before[key]);
       assert.equal(after.extraNet,3600);assert.equal(after.netCashFlow,(6398+300-4100-300)*12);
-      // Closed months keep their separate balance-projection semantics.
-      assert.equal(restored.computeMonthlySeries()[0].months[0].netCashFlow,0);
+      near(restored.computeMonthlySeries()[0].months[0].netCashFlow,6398+300-4100-300);
       near(restored.analysisAggregates()[0].netCashFlow,before.netCashFlow);
+    }
+  });
+  test('closing January preserves bank balances and net worth through reload and backup import (#45)',()=>{
+    let e=createEngine({baseYear:2026,singlePerson:false,startCashA:15000,startCashB:5000,
+      startTFSAA:80000,startTFSAB:50000,startRRSPA:250000,startRRSPB:100000,
+      investPct:0,returnRateA:4,returnRateB:4,budgetItems:[expense('Both','Living',3900)]});
+    e.state.years[0].grossA=78000;e.state.years[0].grossB=22000;
+    e.state.years[0].planAutoOff=true;
+    e.state.years[0].months[0].expense=3900;
+    e=createEngine(e.state);
+    const before=e.computeMonthlySeries(),annual=e.computeAnnualAggregates();
+    const januarySurplus=before[0].months[0].earning-3900;
+    assert.ok(januarySurplus>2000);
+    near(before[0].months[0].cash,20000+januarySurplus);
+    const storage=memory(),store=createStore(storage);
+    store.restore(e.state);
+    store.commit('Close January',s=>closeMonth(s,2026,0,'Keep the surplus.',new Date(2026,1,2)));
+    const reloaded=createStore(storage),imported=createStore(memory());
+    imported.restore(parseBackup(backupJSON(reloaded.state)));
+    for(const state of [store.state,reloaded.state,imported.state]){
+      const after=createEngine(state);
+      // Compare every month (including later years), allowing only the completion marker to change.
+      const expected=structuredClone(before);expected[0].months[0].isCompleted=true;
+      assert.deepEqual(after.computeMonthlySeries(),expected);
+      assert.deepEqual(after.computeAnnualAggregates(),annual);
+      assert.equal(state.lessons[0].note,'Keep the surplus.');
+    }
+  });
+  test('closing months preserves contributions, extras, deficit draws and lump-sum lookahead',()=>{
+    for(const mode of ['monthly','lump']){
+      let e=createEngine({baseYear:2026,singlePerson:true,startCashA:1000,startTFSAA:100000,investPct:0});
+      e.state.years[0].planAutoOff=true;
+      for(const m of e.state.years[0].months)Object.assign(m,{earning:1000,expense:2000,tfsaA:100,rrspA:50,
+        extraEntries:[{type:'income',person:'A',amount:100},{type:'loss',person:'A',amount:25}]});
+      e=createEngine(e.state);
+      const policies={2026:{mode,month:0,strategy:'fixed'}};
+      const before=e.computeMonthlySeriesCore(policies);
+      assert.ok(before[0].months[0].autoWithdrawalTotal>0);
+      for(let i=0;i<12;i++)closeMonth(e.state,2026,i,'',new Date(2027,0,2));
+      const expected=structuredClone(before);expected[0].months.forEach(m=>{m.isCompleted=true;});
+      assert.deepEqual(e.computeMonthlySeriesCore(policies),expected);
     }
   });
   test('closed months stay in projections and lessons list newest first',()=>{
