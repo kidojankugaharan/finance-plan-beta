@@ -65,6 +65,7 @@ export function validatePlan(state) {
   if (!Number.isInteger(state.baseYear)) throw new Error('Base year must be a whole year.');
   for (const key of ['ageA','ageB']) numberValue(state[key], {min:18,max:110,optional:true});
   numberValue(state.retirementAge, {min:18,max:100});
+  for(const key of ['retirementAgeA','retirementAgeB']) numberValue(state[key], {min:18,max:100,optional:true});
   numberValue(state.inflationRate, {min:0,max:20});
   numberValue(state.raiseA, {min:-50,max:50});
   numberValue(state.raiseB, {min:-50,max:50});

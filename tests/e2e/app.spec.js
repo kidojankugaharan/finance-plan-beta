@@ -426,3 +426,28 @@ test('imported mortgage exclusion warns until a separate payment covers spending
   await expect(page.locator('.plan-status')).not.toContainText('Review mortgage spending');
   await expect(page.locator('main > .metrics > .metric').nth(1)).toContainText('$64,800');
 });
+
+test('individual stop-work ages keep the younger partner earning in 2029',async({page})=>{
+  await setupPlan(page,{second:true});
+  await nav(page,'more');
+  await page.getByRole('button',{name:'Household & province',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.locator('#ageA').fill('62');
+  await dialog.locator('#ageB').fill('59');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await page.getByRole('button',{name:'Inflation, growth & retirement',exact:true}).click();
+  await dialog.getByLabel('Taylor: stop-work age',{exact:true}).fill('62');
+  await dialog.getByLabel('Morgan: stop-work age',{exact:true}).fill('65');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await nav(page,'salary');
+  await page.getByLabel('Year',{exact:true}).selectOption('2029');
+  await expect(page.locator('.metrics')).toContainText('One retired');
+  const pat=page.locator('.person-grid section').filter({has:page.getByRole('heading',{name:'Taylor',exact:true})});
+  const lee=page.locator('.person-grid section').filter({has:page.getByRole('heading',{name:'Morgan',exact:true})});
+  await expect(pat).toContainText('Retired');await expect(pat).toContainText('2026');
+  await expect(lee).toContainText('Working');await expect(lee).toContainText('2032');
+  await page.reload();
+  await expect(page.locator('.metrics')).toContainText('One retired');
+  await page.getByLabel('Year',{exact:true}).selectOption('2032');
+  await expect(lee).toContainText('Retired');
+});
