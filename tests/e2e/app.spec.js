@@ -9,6 +9,7 @@ async function setupPlan(page,{second=false}={}) {
   await page.getByLabel('Starting year',{exact:true}).fill('2026');
   if(second){await page.getByLabel('Second person’s name (optional)').fill('Morgan');await page.getByLabel('Second person’s age',{exact:true}).fill('33');}
   await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await expect(page.locator('#setup-form .income-notice')).toContainText('Freelance and self-employment tax treatment is not modelled.');
   await page.getByLabel('Taylor · annual salary').fill('80000');
   if(second)await page.getByLabel('Morgan · annual salary').fill('60000');
   await page.getByRole('button',{name:'Continue',exact:true}).click();
@@ -74,11 +75,42 @@ test('freelance income discloses employee approximation in setup, salary, editor
   await expect(page.locator('main .income-notice')).toBeVisible();
   await expect(page.locator('main .income-notice')).toHaveText(disclosure);
   await page.getByRole('button',{name:'Review setup',exact:true}).click();
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Income',exact:true,level:1})).toBeVisible();
-  await expect(page.locator('#setup-form .income-notice')).toHaveText(disclosure);
-  await expect(page.locator('#setup-form .income-notice')).toBeVisible();
-  await expect(page.getByLabel('Taylor · annual salary')).toHaveValue('72000');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.review')).toContainText('$132,000');
+  await expect(dialog.locator('.review')).toContainText('Quebec');
+});
+
+test('Review setup shows saved assumptions without changing a completed plan',async({page})=>{
+  await setupPlan(page);
+  const saved=await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'));
+  const projection=await page.locator('main > .metrics').textContent();
+  expect(JSON.parse(saved).state.setup.completed).toBe(true);
+  await nav(page,'more');
+  const dialog=page.getByRole('dialog');
+  for(const close of ['Done','Cancel','Close dialog','Escape']){
+    await page.getByRole('button',{name:'Review setup',exact:true}).click();
+    await expect(dialog.getByRole('heading',{name:'Review setup',exact:true})).toBeVisible();
+    await expect(dialog.locator('.review')).toContainText('Taylor');
+    await expect(dialog.locator('.review')).toContainText('$80,000');
+    await expect(dialog.locator('.review')).toContainText('$24,000 / year');
+    for(const amount of ['$8,000','$30,000','$40,000'])await expect(dialog.locator('.review')).toContainText(amount);
+    await expect(dialog.locator('input,select')).toHaveCount(0);
+    await expect(page.getByRole('button',{name:'Save and finish later'})).toHaveCount(0);
+    expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
+    if(close==='Escape')await page.keyboard.press('Escape');
+    else await dialog.getByRole('button',{name:close,exact:true}).click();
+    await expect(dialog).not.toBeVisible();
+    expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
+  }
+  await nav(page,'year');
+  await expect(page.locator('main')).toContainText('Taylor');
+  await expect(page.locator('#app > .draft-banner')).toHaveCount(0);
+  await expect(page.locator('main > .metrics')).toHaveText(projection);
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'Your year, in focus.'})).toBeVisible();
+  await expect(page.locator('#app > .draft-banner')).toHaveCount(0);
+  await expect(page.locator('main > .metrics')).toHaveText(projection);
+  expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
 });
 
 test('debt payments disclose expense-only tracking before entry and after saving',async({page})=>{
@@ -115,7 +147,8 @@ test('setup drafts survive finish-later and reload; Back works before assumption
   await page.goto('./');await page.getByRole('button',{name:'Build my plan'}).click();
   await page.getByLabel('Your name',{exact:true}).fill('Draft name');
   await page.getByRole('button',{name:'Save and finish later'}).click();
-  await page.reload();await page.locator('#resume-banner').click();
+  await page.reload();await nav(page,'more');
+  await page.locator('main').getByRole('button',{name:'Resume setup',exact:true}).click();
   await expect(page.getByLabel('Your name',{exact:true})).toHaveValue('Draft name');
   await page.getByLabel('Your age in the starting year').fill('40');
   for(let i=0;i<4;i++)await page.getByRole('button',{name:'Continue',exact:true}).click();
