@@ -9,14 +9,16 @@ function computeAnnualAggregates(){
       acc.netCashFlow+=m.displayNetCashFlow; acc.tfsaContrib+=m.tfsaContrib; acc.rrspContrib+=m.rrspContrib;
       acc.growth+=m.investGrowthIncome;
       acc.autoWithdrawalTotal+=Number(m.autoWithdrawalTotal)||0;
+      acc.autoWithdrawalUncovered+=Number(m.autoWithdrawalUncovered)||0;
       return acc;
-    }, {earning:0,expense:0,extraNet:0,netCashFlow:0,tfsaContrib:0,rrspContrib:0,growth:0,autoWithdrawalTotal:0});
+    }, {earning:0,expense:0,extraNet:0,netCashFlow:0,tfsaContrib:0,rrspContrib:0,growth:0,autoWithdrawalTotal:0,autoWithdrawalUncovered:0});
     const end = y.months[11];
     const totalSaved = t.netCashFlow + t.tfsaContrib + t.rrspContrib;
     const savingsRate = t.earning>0 ? (totalSaved/t.earning*100) : 0;
     return {
       year:y.year, earning:t.earning, expense:t.expense, extraNet:t.extraNet, netCashFlow:t.netCashFlow,
       tfsaContrib:t.tfsaContrib, rrspContrib:t.rrspContrib, growth:t.growth, autoWithdrawalTotal:t.autoWithdrawalTotal,
+      autoWithdrawalUncovered:t.autoWithdrawalUncovered,
       openingPrincipalAdjTfsa:Number(y.openingPrincipalAdjTfsa)||0, openingPrincipalAdjRrsp:Number(y.openingPrincipalAdjRrsp)||0,
       netWorth:end.netWorth, cashA:end.cashA, cashB:end.cashB, tfsaBal:end.tfsaBal, rrspBal:end.rrspBal,
       savingsRate
@@ -216,7 +218,7 @@ function computeMonthlySeriesCore(policies){
       // the combined bank balance back to $0. Withdrawal priority is:
       // 1) TFSAs, smallest current account first; 2) RRSPs, smallest current
       // account first. If the full portfolio cannot cover the deficit, the
-      // uncovered amount remains negative and is surfaced as a critical flag.
+      // uncovered amount is reported separately from bank assets below.
       const cashBeforeAutoWithdrawal = cashA + cashB;
       let bankDeficitBeforeWithdrawal = (cashBeforeAutoWithdrawal < -0.005)
         ? Math.abs(cashBeforeAutoWithdrawal) : 0;
@@ -335,6 +337,12 @@ function computeMonthlySeriesCore(policies){
           autoWithdrawalAccounts.push({type:"RRIF minimum", person, amount:draw, net:draw - tax, tax, rrifMinimum:true});
         });
       }
+
+      // Unfunded spending is a shortfall, not a negative bank asset or an
+      // assumed loan. Record only this month's actual gap (not a lump-sum
+      // lookahead gap), then let later months start with an empty bank.
+      autoWithdrawalUncovered = Math.max(0, -(cashA + cashB));
+      if(cashA + cashB < 0){ cashA = 0; cashB = 0; }
 
       const sharedReturnOverrideA = m.monthlyReturnOverrideA!==undefined ? m.monthlyReturnOverrideA : m.tfsaReturnOverrideA;
       const sharedReturnOverrideB = m.monthlyReturnOverrideB!==undefined ? m.monthlyReturnOverrideB : m.tfsaReturnOverrideB;
