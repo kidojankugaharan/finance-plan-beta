@@ -2,6 +2,7 @@ export const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&
 export const money = n => new Intl.NumberFormat('en-CA',{style:'currency',currency:'CAD',maximumFractionDigits:0}).format(Number(n)||0);
 export const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 export const people = state => state.singlePerson ? ['A'] : ['A','B'];
+export const employmentIncomeNotice = '<p class="income-notice"><strong>Employee payroll approximation.</strong> Salary entries use employee income tax and CPP/QPP, EI and QPIP estimates. Freelance and self-employment tax treatment is not modelled. Entering freelance income here may give inaccurate take-home income and projections. Verify your after-tax income separately before relying on this plan.</p>';
 export const name = (s,p) => s['name'+p] || 'Person '+p;
 export const options = (entries, value) => entries.map(([v,l])=>`<option value="${escape(v)}" ${String(v)===String(value)?'selected':''}>${escape(l)}</option>`).join('');
 export const select = (key,label,entries,value,hint='') => `<label><span id="${key}-label">${escape(label)}</span><select name="${key}" id="${key}" aria-labelledby="${key}-label" ${hint?`aria-describedby="${key}-hint"`:''}>${options(entries,value)}</select>${hint?`<small id="${key}-hint">${escape(hint)}</small>`:''}</label>`;

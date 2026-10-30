@@ -1,4 +1,4 @@
-import {field,select,card,button,submit,listen,escape,money,people,name} from './shared.js';
+import {field,select,card,button,submit,listen,escape,money,people,name,employmentIncomeNotice} from './shared.js';
 import {numberValue} from '../validation.js';
 import {PROVINCES} from '../engine/provinces.js';
 
@@ -36,7 +36,7 @@ export function readPensions(s,d) {for(const p of people(s))s.pensions[p]={cppSt
 function content(c,step) {
   const s=c.state;
   if(step===0)return householdFields(s);
-  if(step===1)return `<p>Annual employment income before tax. Enter 0 if you are not working.</p><div class="fields">${people(s).map(p=>field('gross'+p,`${name(s,p)} · annual salary`,s.years[0]['gross'+p],{required:true})).join('')}</div>`;
+  if(step===1)return `<p>Annual employment income before tax. Enter 0 if you are not working.</p>${employmentIncomeNotice}<div class="fields">${people(s).map(p=>field('gross'+p,`${name(s,p)} · annual salary`,s.years[0]['gross'+p],{required:true})).join('')}</div>`;
   if(step===2)return `<p>Start with one monthly expense. You can add categories, dates, and other frequencies in Budget later.</p>${s.budgetItems.length?`<p>${s.budgetItems.length} expenses entered · ${money(c.engine.budgetTotalAnnual(s.baseYear))} per year.</p>`:`<div class="fields">${field('expense','Expense name','',{type:'text',placeholder:'Housing, groceries, transport…'})}${field('cost','Monthly amount','',{hint:'Leave both fields blank to finish this step later.'})}</div>`}`;
   if(step===3)return balanceFields(s);
   if(step===4)return assumptionFields(s);

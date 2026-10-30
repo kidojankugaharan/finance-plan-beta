@@ -46,6 +46,41 @@ test('fresh household completes setup, visits every tab, persists, and fits the 
   expect(errors).toEqual([]);
 });
 
+test('freelance income discloses employee approximation in setup, salary, editor and assumptions',async({page})=>{
+  await setupPlan(page,{second:true});
+  await nav(page,'more');
+  await page.getByRole('button',{name:'Household & province',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByLabel('Province or territory').selectOption('QC');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await nav(page,'salary');
+  const notice=page.locator('main .income-notice');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText('Employee payroll approximation.');
+  await expect(notice).toContainText('Freelance and self-employment tax treatment is not modelled.');
+  await expect(notice).toContainText('inaccurate take-home income and projections');
+  const disclosure=await notice.textContent();
+  await page.getByRole('button',{name:'Edit this year'}).click();
+  await expect(dialog.locator('.income-notice')).toHaveText(disclosure);
+  await dialog.getByLabel('Taylor · annual salary').fill('72000');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(page.locator('main')).toContainText('Employee CPP/QPP · EI · QPIP (estimated)');
+  await expect(page.locator('main > .metrics')).toContainText('Employee payroll / pension estimate');
+  await page.reload();
+  await nav(page,'salary');
+  await expect(notice).toBeVisible();
+  await nav(page,'more');
+  await page.getByText('What the numbers assume',{exact:true}).click();
+  await expect(page.locator('main .income-notice')).toBeVisible();
+  await expect(page.locator('main .income-notice')).toHaveText(disclosure);
+  await page.getByRole('button',{name:'Review setup',exact:true}).click();
+  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Income',exact:true,level:1})).toBeVisible();
+  await expect(page.locator('#setup-form .income-notice')).toHaveText(disclosure);
+  await expect(page.locator('#setup-form .income-notice')).toBeVisible();
+  await expect(page.getByLabel('Taylor · annual salary')).toHaveValue('72000');
+});
+
 test('debt payments disclose expense-only tracking before entry and after saving',async({page})=>{
   await setupPlan(page);
   await nav(page,'budget');
