@@ -1,3 +1,3 @@
 # Issues
 
-No current reproducible application defects were found in this fresh audit of the existing plan. The required backup export/import roundtrip succeeded; one later optional export timed out once but was not reproduced. The existing January 2026 closeout and lesson survived import and restart.
+No current reproducible application findings were found in the new 2026-10-30 20:55–20:57 UTC audit of the existing persistent plan. Household, budget, goal, closed January and lesson survived a new export/import and browser restart. Browser error reports were empty. Disclosed modelling limitations and test coverage are recorded in session-notes.md; this does not establish tax accuracy or sustainable retirement income.

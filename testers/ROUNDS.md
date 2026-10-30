@@ -111,3 +111,30 @@ Needs-human: none
 Idea-backlog: none
 Skipped personas: none
 Result: completed
+
+## 2026-10-30T20:08:42.761Z — all, round 1
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 2 https://github.com/kidojankugaharan/finance-plan-beta/issues/77 https://github.com/kidojankugaharan/finance-plan-beta/issues/78
+PRs merged: 0 
+Needs-human: none
+Idea-backlog: none
+Skipped personas: none
+Result: completed
+
+## 2026-10-30T20:48:52.908Z — all, round 2
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 5 https://github.com/kidojankugaharan/finance-plan-beta/issues/79 https://github.com/kidojankugaharan/finance-plan-beta/issues/80 https://github.com/kidojankugaharan/finance-plan-beta/issues/81 https://github.com/kidojankugaharan/finance-plan-beta/issues/82 https://github.com/kidojankugaharan/finance-plan-beta/issues/83
+PRs merged: 4 https://github.com/kidojankugaharan/finance-plan-beta/pull/84 https://github.com/kidojankugaharan/finance-plan-beta/pull/85 https://github.com/kidojankugaharan/finance-plan-beta/pull/86 https://github.com/kidojankugaharan/finance-plan-beta/pull/87
+Needs-human: none
+Idea-backlog: none
+Skipped personas: none
+Result: completed
+
+## 2026-10-30T21:26:10.868Z — all, round 3
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 3 https://github.com/kidojankugaharan/finance-plan-beta/issues/88 https://github.com/kidojankugaharan/finance-plan-beta/issues/89 https://github.com/kidojankugaharan/finance-plan-beta/issues/90
+PRs merged: 3 https://github.com/kidojankugaharan/finance-plan-beta/pull/91 https://github.com/kidojankugaharan/finance-plan-beta/pull/92 https://github.com/kidojankugaharan/finance-plan-beta/pull/93
+Needs-human: none
+Idea-backlog: 88
+Skipped personas: none
+Result: completed

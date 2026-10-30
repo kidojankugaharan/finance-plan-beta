@@ -1,3 +1,3 @@
-﻿# Issues
+# Issues
 
-No confirmed application bugs, confusing behavior, or wrong numbers were reproduced in this fresh session. The prior January 2026 closeout and lesson persisted; export, import preview, confirmation, and post-import state persistence all worked.
+No current reproducible application findings in this fresh session. The prior export-without-backup report did not reproduce: Export JSON backup produced a dated file in `testers/pe-caregiver/downloads/`.
