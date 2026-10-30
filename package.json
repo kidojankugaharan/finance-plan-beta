@@ -1,0 +1,20 @@
+{
+  "name": "finance-plan-beta",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --configLoader native --host 127.0.0.1",
+    "build": "vite build --configLoader native",
+    "preview": "vite preview --configLoader native --host 127.0.0.1",
+    "test": "vitest run --configLoader native",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "acorn": "^8.15.0",
+    "eslint-scope": "^8.4.0",
+    "vite": "^7.1.12",
+    "vitest": "^3.2.4"
+  }
+}

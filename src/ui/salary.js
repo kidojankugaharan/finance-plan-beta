@@ -1,0 +1,21 @@
+import {field,select,card,metric,button,listen,openEditor,escape,money,people,name,yearOptions} from './shared.js';
+import {numberValue} from '../validation.js';
+import {pensionFields,readPensions} from './setup.js';
+import {PROVINCES} from '../engine/provinces.js';
+export function render(c) {
+  const idx=c.state.years.findIndex(y=>y.year===c.year),row=c.result.salary[idx],s=c.state;
+  return `<div class="page-heading"><span class="eyebrow">FROM GROSS TO TAKE-HOME</span><h1>Salary</h1><p>Employment, pensions, and estimated Canadian taxes.</p></div><div class="toolbar">${select('salary-year','Year',yearOptions(s),c.year)}${button('salary-edit','Edit this year','primary')}${button('pensions-edit','Pension settings')}</div><div class="metrics">${metric('Household gross',money(row.grossA+row.grossB))}${metric('Take-home income',money(row.totalAfterTax))}${metric('Work status',row.pensionActive?'Retired':'Working',`${row.pensionManual?'Manual choice':'Shared stop-work year: '+c.engine.retirementStartYear()}`)}</div>${card('Income breakdown',`<div class="person-grid">${people(s).map(p=>{const t=row['tax'+p],pen=row['pension'+p],settings=s.pensions[p];return `<section><h3>${escape(name(s,p))}</h3><dl class="review"><dt>Gross income</dt><dd>${money(row['gross'+p])}</dd><dt>Federal income tax</dt><dd>${money(t.fedTax)}</dd><dt>Provincial income tax</dt><dd>${money((t.provTax??t.onTax??0)+(t.healthPremium||0))}</dd><dt>CPP/QPP · EI · QPIP</dt><dd>${money(t.cpp+t.ei+(t.qpip||0))}</dd><dt>OAS repayment</dt><dd>${money(t.oasClawback)}</dd><dt>Take-home</dt><dd>${money(row['at'+p])}</dd><dt>CPP/QPP starts</dt><dd>${s.baseYear+settings.cppStartAge-s['age'+p]} · age ${settings.cppStartAge}</dd><dt>OAS starts</dt><dd>${s.baseYear+settings.oasStartAge-s['age'+p]} · age ${settings.oasStartAge}</dd>${pen?`<dt>CPP/QPP / OAS</dt><dd>${money(pen.cpp)} / ${money(pen.oas)}</dd>`:''}</dl></section>`;}).join('')}</div><p class="hint">${PROVINCES[s.province].name} · 2026 tax rules with projected indexation. ${s.province!=='ON'?'Simplified provincial estimate: additional senior, family, and low-income credits may reduce actual tax. ':''}RRSP deduction refunds appear in April of the following year in Year. These are planning estimates, not a tax return.</p>`)}${card('Income over time',`<div class="table-scroll" tabindex="0" aria-label="Salary projection"><table><thead><tr><th>Year</th><th>Gross</th><th>Take-home</th><th>Work status</th></tr></thead><tbody>${s.years.map((y,i)=>{const r=c.result.salary[i];return `<tr><th>${y.year}</th><td>${money(r.grossA+r.grossB)}</td><td>${money(r.totalAfterTax)}</td><td>${r.pensionActive?'Retired':'Working'}</td></tr>`;}).join('')}</tbody></table></div>`)}`;
+}
+export function bind(c) {
+  listen('salary-year','change',e=>c.setYear(Number(e.target.value)));
+  listen('pensions-edit','click',()=>openEditor('Pension settings',pensionFields(c.state),d=>c.update('Updated pensions',s=>readPensions(s,d))));
+  listen('salary-edit','click',()=>{
+    const y=c.state.years.find(y=>y.year===c.year);
+    openEditor('Income for '+c.year,`<div class="fields">${people(c.state).map(p=>field('gross'+p,`${name(c.state,p)} · annual salary`,y['gross'+p],{hint:'Blank inherits prior salary plus growth. In the first year, blank means zero.'})).join('')}${field('salaryGrowthPct','Pay growth from this year (%)',y.salaryGrowthPct,{min:-50,max:50,hint:'Blank inherits the previous growth rate.'})}${select('pensionModeOverride','Stop-work choice',[['','Follow shared retirement plan'],['true','Start retirement'],['false','Keep working (manual override)']],y.pensionModeOverride??'')}</div><p>Manual stop-work choices carry forward. Retirement begins no earlier than the shared stop-work year; change the shared age in More for earlier retirement.</p>`,d=>c.update('Updated income for '+c.year,s=>{
+      const row=s.years.find(y=>y.year===c.year);
+      for(const p of people(s))row['gross'+p]=numberValue(d['gross'+p],{optional:true,whole:true});
+      row.salaryGrowthPct=numberValue(d.salaryGrowthPct,{optional:true,min:-50,max:50});
+      row.pensionModeOverride=d.pensionModeOverride===''?null:d.pensionModeOverride==='true';
+    }));
+  });
+}
