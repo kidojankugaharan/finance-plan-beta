@@ -216,6 +216,25 @@ export function registerSuite(test) {
     const after=createEngine(e.state).computeAnnualAggregates()[0];
     near(after.earning,before.earning);near(after.expense,4300*11);
   });
+  test('close-out preserves annual extra cash flows, net savings, and savings rate',()=>{
+    for(const count of [1,2,12]){
+      const e=createEngine({baseYear:2026,singlePerson:false,investPct:0});
+      e.state.years[0].planAutoOff=true;
+      for(const m of e.state.years[0].months){
+        Object.assign(m,{earning:6398,expense:4100,tfsaA:100,rrspB:200,
+          extraEntries:[{type:'income',person:'B',amount:450},{type:'loss',person:'A',amount:150}]});
+      }
+      const before=e.computeAnnualAggregates()[0];
+      for(let i=0;i<count;i++)closeMonth(e.state,2026,i,'',new Date(2027,0,2));
+      const restored=createEngine(parseBackup(backupJSON(e.state)));
+      const after=restored.computeAnnualAggregates()[0];
+      for(const key of ['earning','expense','extraNet','netCashFlow','tfsaContrib','rrspContrib','savingsRate'])near(after[key],before[key]);
+      assert.equal(after.extraNet,3600);assert.equal(after.netCashFlow,(6398+300-4100-300)*12);
+      // Closed months keep their separate balance-projection semantics.
+      assert.equal(restored.computeMonthlySeries()[0].months[0].netCashFlow,0);
+      near(restored.analysisAggregates()[0].netCashFlow,before.netCashFlow);
+    }
+  });
   test('closed months stay in projections and lessons list newest first',()=>{
     const open=createEngine({baseYear:2026,singlePerson:true,startCashA:5000}),shut=createEngine(structuredClone(open.state));
     closeMonth(shut.state,2026,0,'a',new Date(2026,1,2));
