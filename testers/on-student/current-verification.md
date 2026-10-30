@@ -1,0 +1,15 @@
+# Current verification notes
+
+Fresh browser batches on 2026-10-30 used the existing agent profile, with skip-build. All earlier evidence and profiles were preserved. The final batch exited cleanly with quit and code 0. No application fixes or issue-filing commands were run.
+
+Reviewed Year, Salary, Budget, Invest, More, Goals, Projection & analysis, Lessons learned and Review setup. Existing setup was retained rather than resetting the seven-step journey. Review confirms Alex, Ontario, $18,000 employee salary, January 1 cash $1,500, TFSA $500, RRSP $0. Salary growth is 0%, inflation 2.5%, investment return 7%, retirement in 2070; Salary shows CPP/OAS starting at 65. These long-term assumptions were retained as estimates, not established pension entitlement. No unsupported income was converted to salary.
+
+Existing illustrative expense split: room rent $950 + groceries $300 + transport $100 + student loan $100 = $1,450/month; times 12 = $17,400. Salary take-home $16,844 minus expenses $17,400 = -$556. Cash $1,500 minus $556 = $944; TFSA $500 plus $35 growth = $535; combined year-end $1,479. Displayed arithmetic agrees at whole-dollar precision. Tax correctness was not independently assessed.
+
+January was already closed. Its existing lesson about variable hours, tuition and separately tracking the loan was inspected and survived import and reload. No second closeout was claimed. The prior month-count finding was withdrawn: eight finished months February through September is correct on October 30; the remaining displayed months include unfinished October and future November/December.
+
+Exported 2026-10-30T20-00-26-958Z-backup.json, inspected and captured import preview, then confirmed Import this plan. After reload/restart, checked household review, all four expenses, Emergency buffer $3,000 by December 2027, the one hidden closed month and January lesson. Goal shows $0 planned savings and Not reached, consistent with no affordable surplus.
+
+Evidence includes current_review, current_year, current_salary, current_budget, current_invest, current_more, current_balances, verified_goals, verified_projection, verified_lessons, verified_import_preview, persisted_lesson and verified_final screenshots (actual dated filenames in run-log.jsonl). Files named current_goals/current_projection/current_lessons from the failed uppercase-selector batch show More only; they are not evidence of those destination pages. Title-case selectors corrected those command errors. Browser errors returned an empty array.
+
+Salary override dialog and contribution-room controls were inspected, but new variable-hours amounts and registered room were not saved because the brief supplies neither monthly earnings nor actual room. Tuition amount, tuition-credit handling, loan interest/principal/payoff and offline behavior remain unverified. The loan limitation is explicitly disclosed and recorded in issues.md with its required Screenshot field. No additional current reproducible issues were established.
