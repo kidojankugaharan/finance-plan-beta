@@ -1,3 +1,1 @@
-﻿# Issues
-
-No fresh reproducible findings were established in this run. The requested interactive harness could not be kept open because stdin was closed by the available command runner; prior findings are not treated as current verification.
+﻿# Issues`n`nNo current reproducible findings in this retest. The prior sabbatical goal success wording no longer reproduces: the goal now says “Funding not assessed” and explains that household net worth does not show earmarked or available funds.

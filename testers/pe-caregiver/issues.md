@@ -1,8 +1,8 @@
-﻿# Issues
+# Issues
 
-## [wrong-number] Closed January is omitted from 2026 annual totals
-Dedupe-key: closed-month-omitted-from-annual-totals-wrong-number
-Steps: 1. Open the existing Jamie & Quinn plan for 2026 with January already closed. 2. Read the annual take-home and expenses on the Year page and compare the monthly values. 3. Read the notice about hidden closed-month data.
-Expected: Annual totals include all twelve months; the notice says closed-month data still counts. Salary shows CAD 69,944 take-home and Budget shows CAD 50,400 expenses, while each of the eleven visible open months shows CAD 5,829 and CAD 4,200.
-Actual: Year displays CAD 64,115 take-home and CAD 46,200 expenses, exactly eleven monthly amounts, despite saying one closed month is hidden and its data still counts. Reproduced in this session using the existing persistent plan.
-Screenshot: testers/pe-caregiver/screenshots/2026-10-30T14-59-22-568Z-year_current.png
+## [bug] Export backup does not produce a downloadable file
+Dedupe-key: export-backup-download-timeout
+Steps: 1. Open the persistent plan. 2. In More, run `{"op":"export"}`. 3. Wait for the harness download result.
+Expected: A dated JSON backup downloads so the user can keep a copy and continue with import verification.
+Actual: The harness timed out waiting for a browser download; no new backup file appeared. Existing older backups were present, but this session could not export a fresh one.
+Screenshot: testers/pe-caregiver/screenshots/2026-10-30T16-31-51-803Z-assumptions.png

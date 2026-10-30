@@ -1,22 +1,7 @@
 ﻿# Issues
 
-## [wrong-number] Closing January removes its cash flows from annual totals
-Dedupe-key: closed-month-cash-flows-excluded-from-annual-totals
-Steps: 1. Open the existing 2026 Year view for Avery and Drew, where monthly take-home is $6,398 and monthly expenses are $4,100. 2. Observe January is already closed and hidden. 3. Compare the displayed annual totals and Projection & analysis row.
-Expected: The 2026 totals include January's saved income and expenses; the Year notice explicitly says hidden closed-month data still counts.
-Actual: Both the Year summary and projection show $70,383 income and $45,100 expenses, exactly 11 × $6,398 and 11 × $4,100. The other 11 month cards each show the regular monthly figures. The displayed annual totals contradict the closed-month notice.
-Screenshot: testers/mb-newcomer-couple/screenshots/2026-10-30T14-57-52-880Z-fresh-year.png; testers/mb-newcomer-couple/screenshots/2026-10-30T14-57-52-880Z-projection-current.png
+No confirmed application defect in this fresh review. The persistent plan shows Avery & Drew in Manitoba for 2026, $98,000 combined gross salary, $49,200 annual expenses, $9,000 cash, $8,000 TFSA, $12,000 RRSP, a $15,000 education goal by December 2029, and a January 2026 closeout with its lesson. Expense arithmetic matched $3,750 living + $350 loan payment = $4,100 monthly and $49,200 annually. Existing closeout was inspected and preserved; no new closeout was claimed.
 
-## [idea] Allow OAS estimates to reflect shorter Canadian residency
-Dedupe-key: oas-residency-duration-cannot-be-modeled
-Steps: 1. Open More > Review setup > Pensions for this household, which moved to Canada five years ago. 2. Review the OAS assumption and available fields.
-Expected: Let the household enter Canadian-residency years or an OAS benefit estimate so shorter residency can be represented.
-Actual: Setup discloses that OAS assumes 40 years of Canadian residence after age 18 and provides no residency-years field or OAS amount override. This is a disclosed limitation. Based on the brief, projected residency at age 65 would be about 29 years for Avery and 31 for Drew; no entitlement calculation was independently verified.
-Screenshot: testers/mb-newcomer-couple/screenshots/2026-10-30T14-57-52-880Z-pensions-current.png
+Review notes: The app explicitly explains that loan payments are expenses only and do not track principal, interest, balance, payoff date, or debt in net worth. OAS uses a 40-year Canadian residency assumption without a residency-years input; actual registered room must come from CRA/own records. Goal savings are planned only and do not move or confirm money. Salary tax figures are planning estimates; Manitoba credit caveat was visible and tax accuracy was not independently checked. Setup review showed default 2.5% pay growth with 2.5% inflation, 7% return, and stop-work year 2047; I did not change or independently compare these assumptions. Did not test monthly/yearly overrides, registered room entry, alternate growth scenarios, or changing goal contributions.
 
-## [idea] Track the personal-loan balance as a household liability
-Dedupe-key: debt-payments-do-not-model-liability-principal-or-interest
-Steps: 1. Review the existing $350 monthly Personal loan payment expense, with $3,750 of other living expenses and $4,100 total monthly expenses. 2. Review the Year net-worth metric and starting balances.
-Expected: Represent the $12,000 loan liability and show how payments affect principal and interest, or clearly identify net worth as assets before debt.
-Actual: Budget lists the payment as an expense, but there is no loan balance or amortization input. The Year metric says “Bank + TFSA + RRSP” and does not subtract the $12,000 liability; the expense does not model principal or interest. This is a disclosed product limitation.
-Screenshot: testers/mb-newcomer-couple/screenshots/2026-10-30T14-57-52-880Z-budget-current.png; testers/mb-newcomer-couple/screenshots/2026-10-30T14-57-52-880Z-final-year.png
+Exported and re-imported `2026-10-30T16-28-36-586Z-backup.json`; app recorded the imported backup, and household, goal and January lesson were visible afterward and on reload. Screenshot evidence is in `testers/mb-newcomer-couple/screenshots/`, including `2026-10-30T16-28-43-181Z-import_preview.png`, `2026-10-30T16-29-14-915Z-goal_persisted.png`, `2026-10-30T16-29-14-915Z-lesson_persisted.png`, and `2026-10-30T16-29-20-105Z-reloaded_final.png`. Browser errors: none. Setup steps 1–5 and the existing closeout were not re-entered in this fresh session; the prior persistent plan was used. No browser-level failure was confirmed from intermittent file-batch launch state; harness locator mistakes were not treated as product defects.
