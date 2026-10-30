@@ -1,7 +1,8 @@
 ﻿# Issues
 
-No confirmed application defect in this fresh review. The persistent plan shows Avery & Drew in Manitoba for 2026, $98,000 combined gross salary, $49,200 annual expenses, $9,000 cash, $8,000 TFSA, $12,000 RRSP, a $15,000 education goal by December 2029, and a January 2026 closeout with its lesson. Expense arithmetic matched $3,750 living + $350 loan payment = $4,100 monthly and $49,200 annually. Existing closeout was inspected and preserved; no new closeout was claimed.
-
-Review notes: The app explicitly explains that loan payments are expenses only and do not track principal, interest, balance, payoff date, or debt in net worth. OAS uses a 40-year Canadian residency assumption without a residency-years input; actual registered room must come from CRA/own records. Goal savings are planned only and do not move or confirm money. Salary tax figures are planning estimates; Manitoba credit caveat was visible and tax accuracy was not independently checked. Setup review showed default 2.5% pay growth with 2.5% inflation, 7% return, and stop-work year 2047; I did not change or independently compare these assumptions. Did not test monthly/yearly overrides, registered room entry, alternate growth scenarios, or changing goal contributions.
-
-Exported and re-imported `2026-10-30T16-28-36-586Z-backup.json`; app recorded the imported backup, and household, goal and January lesson were visible afterward and on reload. Screenshot evidence is in `testers/mb-newcomer-couple/screenshots/`, including `2026-10-30T16-28-43-181Z-import_preview.png`, `2026-10-30T16-29-14-915Z-goal_persisted.png`, `2026-10-30T16-29-14-915Z-lesson_persisted.png`, and `2026-10-30T16-29-20-105Z-reloaded_final.png`. Browser errors: none. Setup steps 1–5 and the existing closeout were not re-entered in this fresh session; the prior persistent plan was used. No browser-level failure was confirmed from intermittent file-batch launch state; harness locator mistakes were not treated as product defects.
+## [idea] Allow limited Canadian residency in OAS assumptions
+Dedupe-key: oas-residency-years-not-modelled
+Steps: 1. Open More. 2. Open CPP/QPP & OAS. 3. Review the public pension assumptions for Avery and Drew, who moved to Canada five years ago.
+Expected: A way to enter Canadian residence years or a household-specific OAS estimate so this newcomer household can represent its circumstances.
+Actual: The editor explicitly assumes 40 years of Canadian residence after age 18. It provides OAS start ages, but no residence-years input or OAS amount adjustment. This is a disclosed limitation; no exact entitlement or tax error is claimed.
+Screenshot: testers/mb-newcomer-couple/screenshots/2026-10-30T18-44-13-612Z-fresh_pensions_actual.png

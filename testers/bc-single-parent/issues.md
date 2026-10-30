@@ -1,15 +1,8 @@
 # Issues
 
-## [wrong-number] Closed January is omitted from displayed 2026 take-home total
+## [wrong-number] Closed January is omitted from displayed 2026 monthly take-home
 Dedupe-key: closed-january-omitted-from-displayed-annual-totals-wrong-number
-Steps: 1. Open the 2026 Year tab with January already closed. 2. Compare annual take-home with the visible February–December monthly rows. 3. Observe the closed month is hidden while its data is said to count in totals.
-Expected: Annual take-home should reconcile with January plus February through December, or the page should make the exclusion clear.
-Actual: The Year summary shows $50,386 annual take-home, while the 11 visible rows show $4,199 each ($46,189 total). The page says the closed month still counts in totals. Annual expenses of $51,600 do reconcile to 12 × $4,300. Salary independently shows $50,386 for 2026.
-Screenshot: testers/bc-single-parent/screenshots/2026-10-30T16-22-44-859Z-year_current.png
-
-## [bug] Goals and projection are unreachable from the phone layout
-Dedupe-key: goals-and-projection-unreachable-from-phone-layout-bug
-Steps: 1. Open More at the iPhone 13 viewport. 2. Try Goals or Projection & analysis from More > Explore. 3. Try the corresponding bottom tabs.
-Expected: A phone user should be able to open the goal and projection pages listed in the app navigation.
-Actual: More shows Goals and Projection & analysis as plain text. Their bottom tabs are desktop-only and hidden at this viewport, so the harness cannot activate either page.
-Screenshot: testers/bc-single-parent/screenshots/2026-10-30T16-23-52-942Z-more_nav.png
+Steps: 1. Open the 2026 Year tab with January already closed. 2. Compare annual take-home income with the visible February-December monthly rows. 3. Observe that January is hidden while the page says its data still counts in totals.
+Expected: Annual take-home should reconcile with the monthly amounts, or the page should explain why the displayed monthly rows do not add to the annual total.
+Actual: Year shows $50,386 annual take-home, while each of the 11 visible rows shows $4,199 (11 x $4,199 = $46,189). At $4,199 per month, 12 months would be $50,388, $2 higher than the displayed annual figure. The matching Salary and Projection figures are $50,386, so the discrepancy may come from rounding or month aggregation; the page does not explain it. Expenses reconcile: $51,600 annually equals 12 x $4,300.
+Screenshot: testers/bc-single-parent/screenshots/2026-10-30T18-39-32-421Z-year_current.png

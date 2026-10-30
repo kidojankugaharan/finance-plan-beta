@@ -1,1 +1,3 @@
-﻿# Issues`n`nNo current reproducible findings in this retest. The prior sabbatical goal success wording no longer reproduces: the goal now says “Funding not assessed” and explains that household net worth does not show earmarked or available funds.
+# Issues
+
+No new reproducible application findings in this fresh persistent-plan retest. The existing goal explicitly states that funding and affordability are not assessed, debt payments are expenses only, and contribution room must come from user records; these disclosed limitations behaved as described.

@@ -57,3 +57,30 @@ Needs-human: 37
 Idea-backlog: none
 Skipped personas: none
 Result: completed
+
+## 2026-10-30T18:03:59.635Z — all, round 1
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 4 https://github.com/kidojankugaharan/finance-plan-beta/issues/53 https://github.com/kidojankugaharan/finance-plan-beta/issues/54 https://github.com/kidojankugaharan/finance-plan-beta/issues/55 https://github.com/kidojankugaharan/finance-plan-beta/issues/56
+PRs merged: 2 https://github.com/kidojankugaharan/finance-plan-beta/pull/57 https://github.com/kidojankugaharan/finance-plan-beta/pull/60
+Needs-human: 14, 45
+Idea-backlog: 46
+Skipped personas: none
+Result: completed
+
+## 2026-10-30T18:37:29.676Z — all, round 2
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 1 https://github.com/kidojankugaharan/finance-plan-beta/issues/61
+PRs merged: 2 https://github.com/kidojankugaharan/finance-plan-beta/pull/62 https://github.com/kidojankugaharan/finance-plan-beta/pull/63
+Needs-human: 55
+Idea-backlog: 54
+Skipped personas: none
+Result: completed
+
+## 2026-10-30T18:47:29.781Z — all, round 3
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 2 https://github.com/kidojankugaharan/finance-plan-beta/issues/64 https://github.com/kidojankugaharan/finance-plan-beta/issues/65
+PRs merged: 0 
+Needs-human: none
+Idea-backlog: 61
+Skipped personas: none
+Result: completed
