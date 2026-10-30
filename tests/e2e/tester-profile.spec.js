@@ -1,10 +1,63 @@
 import {test, expect, chromium, devices} from '@playwright/test';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import {openTesterPage, checkpointTesterPage} from '../../scripts/tester-profile.mjs';
 import {freshPlan, STORAGE_KEY} from '../../src/state.js';
 import {createEngine} from '../../src/engine/index.js';
 import {closeMonth} from '../../src/closeout.js';
-import {importTesterBackup} from '../../scripts/tester-run.mjs';
+import {importTesterBackup, preserveTesterDownloads} from '../../scripts/tester-run.mjs';
+
+test('ordinary UI exports survive tester shutdown and can be imported in a fresh session (#78)', async ({browser}) => {
+  // Keep Chromium's download path below the Windows path length limit.
+  await fs.mkdir('.cache', {recursive: true});
+  const directory = await fs.mkdtemp(path.resolve('.cache', 'export-'));
+  const state = createEngine({...freshPlan(), baseYear: 2026, nameA: 'Taylor'}).state;
+  state.setup = {started: true, completed: true, seen: {}, step: 6};
+  const temp = path.join(directory, 'temp');
+  await fs.mkdir(temp, {recursive: true});
+  await fs.mkdir(directory + '/downloads', {recursive: true});
+  const context = await chromium.launchPersistentContext(path.join(directory, 'profile'), {
+    ...devices['iPhone 13'], headless: true, acceptDownloads: true, serviceWorkers: 'block',
+    downloadsPath: path.join(directory, 'downloads'),
+    env: {...process.env, TEMP: temp, TMP: temp, TMPDIR: temp},
+  });
+  const page = context.pages()[0];
+  const downloads = preserveTesterDownloads(page, directory);
+  let files;
+  try {
+    await page.goto('http://127.0.0.1:4173/finance-plan-beta/');
+    await page.evaluate(({key, state}) => localStorage.setItem(key, JSON.stringify({state, history: []})), {key: STORAGE_KEY, state});
+    await page.reload();
+    await page.locator('[data-tab="more"]').click();
+    // Exercise the regular click path: no harness export shortcut or explicit saveAs.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.getByRole('button', {name: 'Export JSON backup', exact: true}).click(),
+      ]);
+      expect(download.suggestedFilename()).toMatch(/^finance-plan-\d{4}-\d{2}-\d{2}\.json$/);
+    }
+    await downloads.flush();
+  } finally { await context.close(); }
+
+  files = await fs.readdir(directory + '/downloads');
+  expect(files).toHaveLength(2);
+  for (const file of files) {
+    expect(JSON.parse(await fs.readFile(directory + '/downloads/' + file, 'utf8')).state).toEqual(state);
+  }
+  const fresh = await browser.newContext({serviceWorkers: 'block'});
+  try {
+    const freshPage = await fresh.newPage();
+    await freshPage.goto('http://127.0.0.1:4173/finance-plan-beta/');
+    await freshPage.getByRole('button', {name: 'Build my plan'}).click();
+    await freshPage.getByRole('button', {name: 'Finish later'}).click();
+    await freshPage.locator('[data-tab="more"]').click();
+    await importTesterBackup(freshPage, directory + '/downloads/' + files[0]);
+    await expect(freshPage.getByRole('dialog')).toContainText('Taylor');
+    await freshPage.getByRole('button', {name: 'Import this plan', exact: true}).click();
+    expect(await freshPage.evaluate(key => JSON.parse(localStorage.getItem(key)).state, STORAGE_KEY)).toEqual(state);
+  } finally { await fresh.close(); }
+});
 
 for (const nativePicker of [true, false]) test(`harness imports an exported backup (${nativePicker ? 'native chooser' : 'no chooser event'})`, async ({}, info) => {
   const temp = info.outputPath('temp');

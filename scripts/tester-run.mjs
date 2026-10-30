@@ -35,6 +35,30 @@ export async function importTesterBackup(page, file) {
   } finally { page.off('filechooser', suppressPicker); }
 }
 
+export function preserveTesterDownloads(page, directory) {
+  const saves = new WeakMap(), pending = new Set(), failures = [];
+  let sequence = 0;
+  page.on('download', download => {
+    // downloadsPath contains browser-managed temporary files, removed on close.
+    // Save every UI download, including clicks that do not use op:export.
+    const name = `${new Date().toISOString().replace(/[:.]/g, '-')}-${++sequence}-${path.basename(download.suggestedFilename())}`;
+    const relative = path.join('downloads', name);
+    const save = fs.mkdir(path.join(directory, 'downloads'), {recursive: true})
+      .then(() => download.saveAs(path.join(directory, relative)))
+      .then(() => relative);
+    saves.set(download, save);
+    pending.add(save);
+    save.then(() => pending.delete(save), error => {pending.delete(save); failures.push(error);});
+  });
+  return {
+    saved: download => saves.get(download),
+    flush: async () => {
+      await Promise.all([...pending]);
+      if (failures.length) throw failures[0];
+    },
+  };
+}
+
 export async function startTester(personaId, {acceptance = false, profileName = 'agent', skipBuild = false} = {}) {
   // Resolve all artifacts from this repository, regardless of the caller's cwd.
   if (path.resolve(process.cwd()) !== path.resolve(root)) throw new Error('Run from the project root.');
@@ -45,6 +69,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
   if (!skipBuild) await build();
   const directory = inside(path.join(root, 'testers'), personaId);
   await fs.mkdir(path.join(directory, 'screenshots'), {recursive: true});
+  await fs.mkdir(path.join(directory, 'downloads'), {recursive: true});
   // Playwright creates launch artifacts in the parent process's temp directory.
   // The tester sandbox cannot write the Windows user temp directory.
   const temp = path.join(directory, 'temp');
@@ -77,6 +102,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
       await route.fulfill({response});
     });
     const page = context.pages()[0] || await context.newPage();
+    const downloads = preserveTesterDownloads(page, directory);
     page.setDefaultTimeout(10000);
     page.on('pageerror', error => {const entry = {kind: 'pageerror', message: error.message}; errors.push(entry); eventLog(entry);});
     page.on('console', message => {if (message.type() === 'error') {const entry = {kind: 'console-error', message: message.text()}; errors.push(entry); eventLog(entry);}});
@@ -89,6 +115,13 @@ export async function startTester(personaId, {acceptance = false, profileName = 
       if (command.selector) return page.locator(command.selector);
       throw new Error('Provide label, role/text, text, or selector.');
     }
+    async function downloadClick(button) {
+      const [download] = await Promise.all([
+        page.waitForEvent('download', {timeout: 10000}),
+        button.click(),
+      ]);
+      return downloads.saved(download);
+    }
     async function command(input) {
       try {
         let result = 'ok';
@@ -98,7 +131,13 @@ export async function startTester(personaId, {acceptance = false, profileName = 
             if (target.origin !== origin || !target.pathname.startsWith('/finance-plan-beta/')) throw new Error('Only local app navigation is allowed.');
             await page.goto(target.href); break;
           }
-          case 'click': await locator(input).click(); break;
+          case 'click': {
+            const target = locator(input);
+            const exportsFile = await target.evaluate(el => ['export-json', 'quick-backup', 'emergency-export'].includes(el.id));
+            if (exportsFile) await downloadClick(target);
+            else await target.click();
+            break;
+          }
           case 'fill': await locator(input).fill(String(input.value)); break;
           case 'select': await locator(input).selectOption(String(input.value)); break;
           case 'text': result = await (input.selector ? locator(input) : page.locator('body')).innerText(); break;
@@ -110,10 +149,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
             await page.screenshot({path: path.join(directory, result), fullPage: true}); break;
           }
           case 'export': {
-            const event = page.waitForEvent('download');
-            await page.getByRole('button', {name: 'Export JSON backup', exact: true}).click();
-            result = `${runId}-backup.json`;
-            await (await event).saveAs(path.join(directory, result)); break;
+            result = await downloadClick(page.getByRole('button', {name: 'Export JSON backup', exact: true})); break;
           }
           case 'import': {
             const file = inside(directory, input.file);
@@ -124,6 +160,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
           case 'note': result = String(input.text); break;
           default: throw new Error('Unknown command: ' + input.op);
         }
+        await downloads.flush();
         await log({kind: 'command', command: input, result});
         return result;
       } catch (error) {
@@ -132,7 +169,7 @@ export async function startTester(personaId, {acceptance = false, profileName = 
       }
     }
     return {persona, directory, profileName: path.basename(profile), page, command, close: async () => {
-      try { await checkpointTesterPage(page, profile); }
+      try { await downloads.flush(); await checkpointTesterPage(page, profile); }
       finally {
         await context.close(); await Promise.all([...pendingLogs]);
         await new Promise(resolve => server.close(resolve));
