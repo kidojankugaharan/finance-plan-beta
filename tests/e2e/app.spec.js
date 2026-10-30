@@ -46,6 +46,36 @@ test('fresh household completes setup, visits every tab, persists, and fits the 
   expect(errors).toEqual([]);
 });
 
+test('debt payments disclose expense-only tracking before entry and after saving',async({page})=>{
+  await setupPlan(page);
+  await nav(page,'budget');
+  const notice=page.locator('main .debt-notice');
+  await expect(notice).toContainText('Debt payments are expenses only.');
+  await expect(notice).toContainText('does not track debt balances, interest, principal repayments, or payoff dates');
+  await expect(notice).toContainText('Debts are not subtracted from net worth');
+  await page.getByRole('button',{name:'+ Debt',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await expect(dialog.locator('.debt-notice')).toHaveText(await notice.textContent());
+  await dialog.getByLabel('Expense name',{exact:true}).fill('Line of credit payment');
+  await dialog.getByLabel('Amount per occurrence (CAD)').fill('250');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  const payment=page.locator('.item-list li').filter({hasText:'Line of credit payment'});
+  await expect(payment).toContainText('$3,000 / year');
+  await expect(page.locator('main > .metrics')).toContainText('$27,000');
+  await page.reload();await nav(page,'budget');
+  await expect(notice).toContainText('Update the payment amount or end month yourself');
+  await payment.getByRole('button',{name:'Edit Line of credit payment',exact:true}).click();
+  await expect(dialog.locator('.debt-notice')).toBeVisible();
+  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
+  // Generic entry also discloses the limit, including custom expense categories.
+  await page.getByRole('button',{name:'Add expense',exact:true}).click();
+  await expect(dialog.locator('.debt-notice')).toBeVisible();
+  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
+  await nav(page,'year');
+  await expect(page.locator('main > .metrics > .metric').nth(1)).toContainText('$27,000');
+  await expect(page.locator('main > .metrics > .metric').nth(2)).toContainText('excludes debts');
+});
+
 test('setup drafts survive finish-later and reload; Back works before assumptions are chosen',async({page})=>{
   await page.goto('./');await page.getByRole('button',{name:'Build my plan'}).click();
   await page.getByLabel('Your name',{exact:true}).fill('Draft name');
