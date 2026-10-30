@@ -126,6 +126,10 @@ test('recurring extras and payday schedules change the intended unlocked months'
 test('closing an ended month saves a lesson, hides the month, and blocks current and future months',async({page})=>{
   await page.clock.setFixedTime(new Date('2026-03-15T12:00:00'));
   await setupPlan(page);
+  const yearTotals=await page.locator('.metrics').textContent();
+  await nav(page,'analysis');
+  const projectionTotals=await page.locator('tbody tr').first().textContent();
+  await nav(page,'year');
   await expect(page.locator('#closeout-reminder')).toContainText('2 past months are still open');
   await expect(page.locator('#close-3')).toHaveAttribute('aria-disabled','true');
   await page.locator('#close-3').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
@@ -137,6 +141,11 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await expect(page.locator('#month-0')).toBeVisible();
   await page.locator('#close-0').click();await dialog.getByLabel(/Notes \/ lessons learned/).fill('Groceries ran over; budget $50 more.');await dialog.getByRole('button',{name:'Save',exact:true}).click();
   await expect(page.locator('#month-0')).toHaveCount(0);await expect(page.locator('#closed-note')).toContainText('1 closed month is hidden');
+  await expect(page.locator('#closed-note')).toContainText('Their data still counts in totals.');
+  await expect(page.locator('.metrics')).toHaveText(yearTotals);
+  await nav(page,'analysis');
+  await expect(page.locator('tbody tr').first()).toHaveText(projectionTotals);
+  await nav(page,'year');
   await expect(page.locator('#closeout-reminder')).toContainText('1 past month is still open');
   await page.locator('#closeout-first').click();await dialog.getByRole('button',{name:'Skip'}).click();
   await expect(page.locator('#month-1')).toHaveCount(0);await expect(page.locator('#closeout-reminder')).toHaveCount(0);

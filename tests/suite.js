@@ -203,6 +203,31 @@ export function registerSuite(test) {
     closeMonth(shut.state,2026,1,'b',new Date(2026,2,2));
     assert.deepEqual(sortedLessons(shut.state).map(l=>l.note),['b','a']);
   });
+  test('closing January preserves all twelve months in Year and analysis totals',()=>{
+    const e=createEngine({baseYear:2026,singlePerson:true,province:'BC',ageA:38,budgetItems:[expense('A','Living costs',4300)]});
+    e.state.years[0].grossA=64000;
+    const before=project(e.state);
+    near(before.monthly[0].months[0].earning,4198.81,1);
+    closeMonth(e.state,2026,0,'',new Date(2026,1,2));
+    const after=project(e.state),engine=createEngine(e.state);
+    assert.equal(after.monthly[0].months[0].isCompleted,true);
+    assert.deepEqual(after.annual,before.annual);
+    near(after.annual[0].expense,51600);
+    near(after.annual[0].earning,before.salary[0].totalAfterTax);
+    assert.deepEqual(engine.analysisAggregates(),before.annual);
+    const html=year.render({state:engine.state,engine,result:after,year:2026,today:()=>new Date(2026,1,2)});
+    assert.match(html,/Their data still counts in totals/);
+    assert.doesNotMatch(html,/id="month-0"/);
+  });
+  test('closing months preserves extras, contributions, withdrawals and carried balances',()=>{
+    const e=scenario('retiringCouple');
+    const jan=e.state.years[0].months[0];
+    jan.earning=100;jan.expense=9000;jan.tfsaA=200;jan.rrspA=100;
+    jan.extraEntries=[{type:'income',person:'A',amount:300},{type:'loss',person:'B',amount:50}];
+    const before=e.computeAnnualAggregates();
+    for(const m of [0,1,11])closeMonth(e.state,2026,m,'',new Date(2027,0,2));
+    assert.deepEqual(createEngine(e.state).computeAnnualAggregates(),before);
+  });
   test('lessons learned survive store, JSON export/import, and are validated',()=>{
     const e=createEngine({baseYear:2026,singlePerson:true});closeMonth(e.state,2026,0,'Cut takeout',new Date(2026,1,2));
     const store=createStore(memory());store.commit('Close',s=>{Object.assign(s,structuredClone(e.state));});
