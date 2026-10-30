@@ -1,7 +1,7 @@
 import {field,select,card,metric,button,listen,submit,openEditor,escape,money,people,name,yearOptions,info} from './shared.js';
 import {numberValue,validateExpense} from '../validation.js';
 import {mortgageNotice} from './budget-check.js';
-const debtNotice='<p class="hint debt-notice"><strong>Debt payments are expenses only.</strong> This plan does not track debt balances, interest, principal repayments, or payoff dates. Debts are not subtracted from net worth. Update the payment amount or end month yourself when payments change or stop.</p>';
+const debtNotice='<p class="hint debt-notice"><strong>Debt payments are expenses only.</strong> This plan does not track debt balances, interest, principal repayments, or payoff dates. Property and debts are excluded from the bank + investments total; it is not full household net worth. Update the payment amount or end month yourself when payments change or stop.</p>';
 const frequencies=[['monthly','Monthly'],['weekly','Weekly'],['biweekly','Every two weeks'],['semimonthly','Twice a month'],['quarterly','Quarterly'],['annual','Annual'],['once','One time'],['daily','Daily'],['bimonthly','Every two months'],['semiannual','Twice a year'],['custom','Custom'],['none','Inactive']];
 function items(c) {return c.engine.budgetItemsForYear(c.year);}
 function editable(s,year) {
