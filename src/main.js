@@ -8,13 +8,14 @@ import * as invest from './ui/invest.js';
 import * as goals from './ui/goals.js';
 import * as analysis from './ui/analysis.js';
 import * as more from './ui/more.js';
+import * as lessons from './ui/lessons.js';
 import {escape,notify,listen,openEditor,download} from './ui/shared.js';
 
 // Storage access itself can throw in private/restricted browser contexts.
 const storage={getItem:key=>window.localStorage.getItem(key),setItem:(key,value)=>window.localStorage.setItem(key,value)};
 const store=createStore(storage);
-const tabs={year,salary,budget,invest,goals,analysis,more};
-const labels={year:'Year',salary:'Salary',budget:'Budget',invest:'Invest',goals:'Goals',analysis:'Projection',more:'More'};
+const tabs={year,salary,budget,invest,goals,analysis,more,lessons};
+const labels={year:'Year',salary:'Salary',budget:'Budget',invest:'Invest',goals:'Goals',analysis:'Projection',more:'More',lessons:'Lessons learned'};
 let active=tabs[location.hash.slice(1)]?location.hash.slice(1):'year';
 let selectedYear=store.state.baseYear;
 let offlineReady=false;
@@ -43,10 +44,10 @@ function update(label,edit) {store.commit(label,edit);refresh();notify(store.err
 function refresh() {calculate();selectedYear=Math.max(store.state.baseYear,Math.min(2086,selectedYear));render();}
 function render() {
   const s=store.state,inSetup=!s.setup.completed&&!s.setup.paused;
-  const ctx={state:s,store,engine,result,year:selectedYear,navigate,update,refresh,exportBackup,importBackup,setYear:y=>{selectedYear=y;render();}};
+  const ctx={today:()=>new Date(),state:s,store,engine,result,year:selectedYear,navigate,update,refresh,exportBackup,importBackup,setYear:y=>{selectedYear=y;render();}};
   document.documentElement.dataset.theme=s.ui.theme||'synthwave';
   const view=inSetup?setup:tabs[active];
-  document.getElementById('app').innerHTML=`<header class="app-header"><a href="#year" id="brand" class="brand"><span class="brand-icon">↗</span><span>Finance Plan<small>CANADA · LOCAL DATA</small></span></a><div class="save-state"><span>${store.error?'Not saved':store.updatedAt?'Saved on device':'Local only'}</span><small id="offline-state">${offlineReady?'Ready offline':'Offline cache pending'}</small></div></header>${store.error?`<aside class="save-error" role="alert">${escape(store.error)} <button id="emergency-export">Download ${store.loadError?'stored data':'backup'}</button></aside>`:''}${!inSetup&&!s.setup.completed?'<aside class="draft-banner">Your setup is a draft. <button id="resume-banner" class="text-button">Resume setup</button></aside>':''}<main id="main" tabindex="-1">${store.loadError?'<h1>Recover your plan</h1><p>Your saved data remains on this device. Import a valid backup to continue.</p><button id="recover-import">Import backup</button>':view.render(ctx)}</main>${!inSetup&&!store.loadError?`<nav class="main-nav" aria-label="Main navigation">${Object.entries(labels).map(([id,label])=>`<button data-tab="${id}" class="${active===id?'active':''} ${['goals','analysis'].includes(id)?'desktop-tab':''}" ${active===id?'aria-current="page"':''}>${label}</button>`).join('')}</nav><footer class="app-footer">Private by design. Stored on this device. <button id="quick-backup" class="text-button">Export backup</button>${store.history.length?'<button id="undo-last" class="text-button">Undo last change</button>':''}</footer>`:''}`;
+  document.getElementById('app').innerHTML=`<header class="app-header"><a href="#year" id="brand" class="brand"><span class="brand-icon">↗</span><span>Finance Plan<small>CANADA · LOCAL DATA</small></span></a><div class="save-state"><span>${store.error?'Not saved':store.updatedAt?'Saved on device':'Local only'}</span><small id="offline-state">${offlineReady?'Ready offline':'Offline cache pending'}</small></div></header>${store.error?`<aside class="save-error" role="alert">${escape(store.error)} <button id="emergency-export">Download ${store.loadError?'stored data':'backup'}</button></aside>`:''}${!inSetup&&!s.setup.completed?'<aside class="draft-banner">Your setup is a draft. <button id="resume-banner" class="text-button">Resume setup</button></aside>':''}<main id="main" tabindex="-1">${store.loadError?'<h1>Recover your plan</h1><p>Your saved data remains on this device. Import a valid backup to continue.</p><button id="recover-import">Import backup</button>':view.render(ctx)}</main>${!inSetup&&!store.loadError?`<nav class="main-nav" aria-label="Main navigation">${Object.entries(labels).filter(([id])=>id!=='lessons').map(([id,label])=>`<button data-tab="${id}" class="${active===id||(id==='more'&&active==='lessons')?'active':''} ${['goals','analysis'].includes(id)?'desktop-tab':''}" ${active===id?'aria-current="page"':''}>${label}</button>`).join('')}</nav><footer class="app-footer">Private by design. Stored on this device. <button id="quick-backup" class="text-button">Export backup</button>${store.history.length?'<button id="undo-last" class="text-button">Undo last change</button>':''}</footer>`:''}`;
   document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.tab)));
   document.querySelector('h1')?.setAttribute('tabindex','-1');
   listen('brand','click',e=>{e.preventDefault();if(!inSetup)navigate('year');});
