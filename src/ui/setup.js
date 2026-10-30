@@ -42,7 +42,11 @@ function content(c,step) {
   if(step===4)return assumptionFields(s);
   if(step===5)return pensionFields(s);
   const retire=c.engine.retirementStartYear();
-  return `<p>Review your plan before opening the projection.</p><dl class="review"><dt>Household</dt><dd>${people(s).map(p=>escape(name(s,p))).join(' & ')} · ${PROVINCES[s.province].name}</dd><dt>Annual salary</dt><dd>${money(c.result.salary[0].grossA+c.result.salary[0].grossB)} · entered</dd><dt>Expenses</dt><dd>${s.budgetItems.length?money(c.engine.budgetTotalAnnual(s.baseYear))+' / year · entered':'Not answered — projection is a draft'}</dd><dt>Bank balances</dt><dd>${money(s.startCashA+(s.singlePerson?0:s.startCashB))} · ${s.startCashA+s.startCashB?'entered':'zero'}</dd><dt>Pay growth</dt><dd>${s.raiseA}% · ${s.payGrowthChoice==='unsure'?'provisional estimate':escape(s.payGrowthChoice)}</dd><dt>Inflation / return</dt><dd>${s.inflationRate}% / ${s.returnRateA}% · estimates</dd><dt>Stop-work year</dt><dd>${Number.isFinite(retire)?retire:'Age not answered'}</dd></dl><p>You can change every assumption in More. Planned savings goals do not reserve money or check affordability.</p>`;
+  const balances=[['Cash','Bank balances'],['TFSA','TFSA balances'],['RRSP','RRSP balances']].map(([account,label])=>{
+    const total=people(s).reduce((sum,p)=>sum+s[`start${account}${p}`],0);
+    return `<dt>${label}</dt><dd>${money(total)} · ${total?'entered':'zero'}</dd>`;
+  }).join('');
+  return `<p>Review your plan before opening the projection.</p><dl class="review"><dt>Household</dt><dd>${people(s).map(p=>escape(name(s,p))).join(' & ')} · ${PROVINCES[s.province].name}</dd><dt>Annual salary</dt><dd>${money(c.result.salary[0].grossA+c.result.salary[0].grossB)} · entered</dd><dt>Expenses</dt><dd>${s.budgetItems.length?money(c.engine.budgetTotalAnnual(s.baseYear))+' / year · entered':'Not answered — projection is a draft'}</dd>${balances}<dt>Pay growth</dt><dd>${s.raiseA}% · ${s.payGrowthChoice==='unsure'?'provisional estimate':escape(s.payGrowthChoice)}</dd><dt>Inflation / return</dt><dd>${s.inflationRate}% / ${s.returnRateA}% · estimates</dd><dt>Stop-work year</dt><dd>${Number.isFinite(retire)?retire:'Age not answered'}</dd></dl><p>You can change every assumption in More. Planned savings goals do not reserve money or check affordability.</p>`;
 }
 export function render(c) {
   const s=c.state;
