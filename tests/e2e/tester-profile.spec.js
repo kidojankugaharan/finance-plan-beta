@@ -48,18 +48,29 @@ test('household checkpoint survives an origin change and repeated full profile r
       await page.getByRole('button', {name: 'Lessons learned', exact: true}).click();
       await expect(page.locator('main')).toContainText('January 2026');
       await expect(page.locator('main')).toContainText('Keep a monthly cushion.');
-      if (restart === 0) {
-        await page.locator('[data-tab="more"]').click();
-        const download = page.waitForEvent('download');
+      await page.locator('[data-tab="more"]').click();
+      // Every restarted session must produce fresh files, including repeated
+      // exports after the backup status rerenders the page.
+      let backup;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const event = page.waitForEvent('download', {timeout: 10000});
         await page.getByRole('button', {name: 'Export JSON backup', exact: true}).click();
-        const backup = await fs.readFile(await (await download).path());
+        const download = await event;
+        expect(download.suggestedFilename()).toMatch(/^finance-plan-\d{4}-\d{2}-\d{2}\.json$/);
+        const file = info.outputPath(`backup-${restart}-${attempt}.json`);
+        await download.saveAs(file);
+        expect(await download.failure()).toBeNull();
+        backup = await fs.readFile(file);
+        expect(JSON.parse(backup).state).toEqual(JSON.parse(raw).state);
+      }
+      if (restart === 0) {
         const chooser = page.waitForEvent('filechooser');
         await page.getByRole('button', {name: 'Import JSON backup', exact: true}).click();
         await (await chooser).setFiles({name: 'fictional.json', mimeType: 'application/json', buffer: backup});
         await expect(page.getByRole('dialog')).toContainText('Taylor & Morgan');
         await page.getByRole('button', {name: 'Import this plan', exact: true}).click();
-        raw = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
       }
+      raw = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
       await checkpointTesterPage(page, directory);
     } finally { await context.close(); }
   }
