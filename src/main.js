@@ -11,6 +11,8 @@ import * as more from './ui/more.js';
 import * as lessons from './ui/lessons.js';
 import {escape,notify,listen,openEditor,download} from './ui/shared.js';
 
+import {mortgageNotice} from './ui/budget-check.js';
+
 // Storage access itself can throw in private/restricted browser contexts.
 const storage={getItem:key=>window.localStorage.getItem(key),setItem:(key,value)=>window.localStorage.setItem(key,value)};
 const store=createStore(storage);
@@ -40,7 +42,7 @@ function importBackup() {
     try {
       if(file.size>5_000_000)throw new Error('Choose a backup under 5 MB.');
       const next=parseBackup(await file.text());
-      openEditor('Review backup import',`<p>Replace your current plan with <strong>${escape(next.nameA||'Unnamed household')}${next.nameB?' & '+escape(next.nameB):''}</strong>?</p><p>Starting year: ${next.baseYear}. ${next.budgetItems.length} regular expenses and ${next.goals.length} goals.</p><p>The current plan is kept in Recent changes so you can revert this import. Download a backup first for a permanent copy.</p>`,()=>{store.restore(next);selectedYear=next.baseYear;refresh();notify('Backup imported. You can revert it in More.');},'Import this plan');
+      openEditor('Review backup import',`<p>Replace your current plan with <strong>${escape(next.nameA||'Unnamed household')}${next.nameB?' & '+escape(next.nameB):''}</strong>?</p><p>Starting year: ${next.baseYear}. ${next.budgetItems.length} regular expenses and ${next.goals.length} goals.</p>${mortgageNotice(createEngine(next),next.baseYear)}<p>The current plan is kept in Recent changes so you can revert this import. Download a backup first for a permanent copy.</p>`,()=>{store.restore(next);selectedYear=next.baseYear;refresh();notify('Backup imported. You can revert it in More.');},'Import this plan');
     } catch(error){notify('Import failed: '+error.message,true);}
   },{once:true});
   document.body.append(input);

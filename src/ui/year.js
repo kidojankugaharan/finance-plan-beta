@@ -2,6 +2,7 @@ import {field,select,card,metric,button,listen,openEditor,escape,money,people,na
 import {numberValue} from '../validation.js';
 import {monthEnded,pendingMonths,closeMonth,NOTE_MAX} from '../closeout.js';
 import {PAY_FREQUENCIES,paydayPlan,saveExtraSeries} from '../engine/cashflow.js';
+import {missingMortgage,mortgageWarning} from './budget-check.js';
 function extraEditor(c,monthIndex=null,entryIndex=null) {
   const current=monthIndex===null?null:c.state.years.find(y=>y.year===c.year).months[monthIndex].extraEntries[entryIndex];
   const date=c.year+'-'+String((monthIndex??0)+1).padStart(2,'0');
@@ -12,6 +13,7 @@ function extraEditor(c,monthIndex=null,entryIndex=null) {
   }));
 }
 export function status(c) {
+  if(missingMortgage(c.engine,c.year))return {text:'Review mortgage spending',detail:mortgageWarning,tab:'budget',action:'Review Budget'};
   if(!c.state.budgetItems.length && !Object.values(c.state.budgetByYear||{}).some(a=>a.length))return {text:'Draft — add your expenses',detail:'Your projection currently assumes no regular spending.',tab:'budget',action:'Add expenses'};
   const short=c.result.monthly.find(y=>y.months.some(m=>m.autoWithdrawalUncovered>0.5));
   if(short)return {text:'Shortfall from '+short.year,detail:'Projected cash and investments cannot cover all spending. Review income, expenses, and retirement timing.',tab:'analysis',action:'Review projection'};

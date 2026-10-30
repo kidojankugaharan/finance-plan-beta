@@ -390,3 +390,39 @@ test('home-improvement goals default to a savings plan and distinguish metric ta
   await page.reload();await nav(page,'goals');
   await expect(goal).toContainText('Planned savings at target date: $0');
 });
+
+
+test('imported mortgage exclusion warns until a separate payment covers spending',async({page})=>{
+  await setupPlan(page);
+  const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state);
+  state.budgetItems[0].expense='Household expenses (excluding mortgage)';
+  state.budgetItems[0].cost=3500;
+  await nav(page,'more');
+  const chooserPromise=page.waitForEvent('filechooser');
+  await page.getByRole('button',{name:'Import JSON backup'}).click();
+  await(await chooserPromise).setFiles({name:'synthetic-plan.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({format:'finance-plan-beta',version:1,state}))});
+  const dialog=page.getByRole('dialog');
+  await expect(dialog.locator('.mortgage-warning')).toContainText('Mortgage payment may be missing');
+  await dialog.getByRole('button',{name:'Import this plan'}).click();
+  await nav(page,'year');
+  await expect(page.locator('.plan-status')).toContainText('Review mortgage spending');
+  await page.getByRole('button',{name:'Review Budget',exact:true}).click();
+  await expect(page.locator('main .mortgage-warning')).toBeVisible();
+  await expect(page.locator('main > .metrics')).toContainText('$42,000');
+  await expect(page.locator('main > .metrics')).toContainText('$3,500');
+  await page.getByRole('button',{name:'Add expense',exact:true}).click();
+  await dialog.getByLabel('Expense name',{exact:true}).fill('Mortgage payment');
+  await dialog.getByLabel('Category',{exact:true}).fill('Housing');
+  await dialog.getByLabel('Amount per occurrence (CAD)').fill('1900');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(page.locator('.mortgage-warning')).toHaveCount(0);
+  await expect(page.locator('main > .metrics')).toContainText('$64,800');
+  await expect(page.locator('main > .metrics')).toContainText('$5,400');
+  await expect(page.locator('main .debt-notice')).toContainText('Debt payments are expenses only');
+  await page.reload();
+  await expect(page.locator('.mortgage-warning')).toHaveCount(0);
+  await expect(page.locator('main > .metrics')).toContainText('$64,800');
+  await nav(page,'year');
+  await expect(page.locator('.plan-status')).not.toContainText('Review mortgage spending');
+  await expect(page.locator('main > .metrics > .metric').nth(1)).toContainText('$64,800');
+});
