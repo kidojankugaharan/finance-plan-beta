@@ -321,6 +321,36 @@ test('backup chooser stays attached until selection or cancellation and can reop
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
 });
 
+for(const fallback of [false,true])test(`dated backup opens a chooser after export and keyboard activation (${fallback?'legacy click':'native picker'})`,async({page},info)=>{
+  if(fallback)await page.addInitScript(()=>{
+    Object.defineProperty(HTMLInputElement.prototype,'showPicker',{value:undefined,configurable:true});
+  });
+  await setupPlan(page);
+  await nav(page,'goals');
+  await nav(page,'more');
+  const downloadEvent=page.waitForEvent('download',{timeout:10000});
+  await page.getByRole('button',{name:'Export JSON backup',exact:true}).click();
+  const download=await downloadEvent;
+  expect(download.suggestedFilename()).toMatch(/^finance-plan-\d{4}-\d{2}-\d{2}\.json$/);
+  const file=info.outputPath(download.suggestedFilename());
+  await download.saveAs(file);
+  const saved=await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'));
+  for(const keyboard of [false,true]){
+    const button=page.getByRole('button',{name:'Import JSON backup',exact:true});
+    await button.focus();
+    const [chooser]=await Promise.all([
+      page.waitForEvent('filechooser',{timeout:10000}),
+      keyboard?button.press('Enter'):button.click(),
+    ]);
+    await chooser.setFiles(file);
+    await expect(page.getByRole('dialog')).toContainText('Review backup import');
+    await expect(page.getByRole('dialog')).toContainText('Taylor');
+    expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
+    await page.getByRole('button',{name:'Cancel',exact:true}).click();
+    await expect(page.locator('input[type="file"]')).toHaveCount(0);
+  }
+});
+
 test('published subpath caches the complete app and reloads offline',async({page,context})=>{
   await setupPlan(page);await expect(page.locator('#offline-state')).toHaveText('Ready offline');
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
