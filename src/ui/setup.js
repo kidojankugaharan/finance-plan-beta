@@ -1,4 +1,4 @@
-import {field,select,card,button,submit,listen,escape,money,people,name,employmentIncomeNotice} from './shared.js';
+import {field,select,card,button,submit,listen,escape,money,people,name,employmentIncomeNotice,pensionEstimateNotice} from './shared.js';
 import {numberValue} from '../validation.js';
 import {PROVINCES} from '../engine/provinces.js';
 
@@ -35,7 +35,7 @@ export function readAssumptions(s,d) {
   for(const p of people(s))s['retirementAge'+p]=numberValue(d['retirementAge'+p],{min:18,max:100,whole:true});
 }
 export function pensionFields(s) {
-  return `<p>Public pensions are estimated separately for each person. OAS assumes 40 years of Canadian residence after age 18. CPP/QPP estimates use your salary history; enter your benefit estimate as a share of the maximum for a better fit.</p><div class="fields">${people(s).map(p=>`${field(`cppStart${p}`,`${name(s,p)} · CPP/QPP start age`,s.pensions[p].cppStartAge,{min:60,max:70,step:1,required:true})}${field(`oasStart${p}`,`${name(s,p)} · OAS start age`,s.pensions[p].oasStartAge,{min:65,max:70,step:1,required:true})}${field(`cppPct${p}`,`${name(s,p)} · CPP/QPP share of maximum (%)`,s.pensions[p].cppPct,{max:100,hint:'Blank uses a salary-based estimate.'})}`).join('')}</div><p class="hint">Pensions enter this projection after each person stops working. For payments received while working, use a yearly income override. Quebec uses a simplified CPP-based retirement benefit estimate; QPP deferral beyond 70 is not modelled.</p>`;
+  return `<p>Public pensions are estimated separately for each person. OAS assumes 40 years of Canadian residence after age 18. CPP/QPP estimates use your salary history; enter your benefit estimate as a share of the maximum for a better fit.</p><div class="fields">${people(s).map(p=>`${field(`cppStart${p}`,`${name(s,p)} · CPP/QPP start age`,s.pensions[p].cppStartAge,{min:60,max:70,step:1,required:true})}${field(`oasStart${p}`,`${name(s,p)} · OAS start age`,s.pensions[p].oasStartAge,{min:65,max:70,step:1,required:true})}${field(`cppPct${p}`,`${name(s,p)} · CPP/QPP share of maximum (%)`,s.pensions[p].cppPct,{max:100,hint:'Blank uses a salary-based estimate.'})}`).join('')}</div><p class="hint">Pensions enter this projection after each person stops working. For payments received while working, use a yearly income override. ${pensionEstimateNotice}</p>`;
 }
 export function readPensions(s,d) {for(const p of people(s))s.pensions[p]={cppStartAge:numberValue(d[`cppStart${p}`],{min:60,max:70,whole:true}),oasStartAge:numberValue(d[`oasStart${p}`],{min:65,max:70,whole:true}),cppPct:numberValue(d[`cppPct${p}`],{max:100,optional:true})};}
 function content(c,step) {

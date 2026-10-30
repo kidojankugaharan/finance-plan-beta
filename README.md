@@ -32,7 +32,7 @@ On the published HTTPS site, use your browser’s **Install app** command, or Sa
 
 ## Calculation scope
 
-The Ontario model includes federal/provincial brackets, basic and age amounts, pension credits, CPP/CPP2, EI, health premium, surtax, RRSP refunds, and OAS recovery. Other provinces and territories have **simplified** provincial estimates (brackets, basic personal amounts, payroll credits, plus selected adjustments). Extra provincial senior, family, and low-income credits are not fully modelled. Quebec includes QPP payroll, EI, QPIP, the federal abatement and worker deduction; its retirement benefit uses a simplified CPP-based estimate.
+The Ontario model includes federal/provincial brackets, basic and age amounts, pension credits, CPP/CPP2, EI, health premium, surtax, RRSP refunds, and OAS recovery. Other provinces and territories have **simplified** provincial estimates (brackets, basic personal amounts, payroll credits, plus selected adjustments). Extra provincial senior, family, and low-income credits are not fully modelled. Quebec includes QPP payroll, EI, QPIP, the federal abatement and worker deduction; its Quebec Pension Plan (QPP) retirement benefit is approximated using the planner’s CPP calculation. QPP-specific benefit rules are not fully modelled, including deferral beyond age 70.
 
 CPP depends on contribution history; the automatic estimate approximates past earnings from the starting salary. OAS assumes 40 years of Canadian residence after age 18. Public pension payments begin only after the shared retirement transition in this version. Employer pensions, GIS, child benefits, self-employment payroll, unregistered investments and fees are not modelled automatically. Enter known after-tax extra amounts in Year where appropriate.
 
