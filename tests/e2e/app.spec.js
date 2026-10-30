@@ -19,7 +19,7 @@ async function setupPlan(page,{second=false}={}) {
   await page.getByLabel('Taylor · TFSA',{exact:true}).fill('30000');
   await page.getByLabel('Taylor · RRSP',{exact:true}).fill('40000');
   await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByLabel('How should your pay change?').selectOption('inflation');
+  await page.getByLabel('Choose an assumption',{exact:true}).selectOption('inflation');
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Review',exact:true,level:1})).toBeVisible();
@@ -87,6 +87,34 @@ test('setup drafts survive finish-later and reload; Back works before assumption
   await expect(page.getByRole('heading',{name:'Assumptions',level:1})).toBeVisible();
   await page.getByRole('button',{name:'Back',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Starting balances',level:1})).toBeVisible();
+});
+
+for(const {choice,value,resume} of [
+  {choice:'Same pay',value:'same',resume:false},
+  {choice:'Not sure — use 0% provisionally',value:'unsure',resume:true}
+])test(`assumption prompt labels a selectable control (${value}, resume=${resume})`,async({page})=>{
+  await page.goto('./');
+  await page.getByRole('button',{name:'Build my plan'}).click();
+  await page.getByLabel('Your name',{exact:true}).fill('Taylor');
+  await page.getByLabel('Your age in the starting year').fill('40');
+  for(let i=0;i<4;i++)await page.getByRole('button',{name:'Continue',exact:true}).click();
+  if(resume){
+    await page.getByRole('button',{name:'Save and finish later'}).click();
+    await page.reload();
+    await page.locator('#resume-banner').click();
+  }
+  await expect(page.getByRole('heading',{name:'Assumptions',level:1})).toBeVisible();
+  const assumption=page.getByLabel('Choose an assumption',{exact:true});
+  await expect(assumption).toHaveRole('combobox');
+  await expect(assumption).toHaveAccessibleName('Choose an assumption');
+  await expect(assumption).toHaveAccessibleDescription('How should your pay change?');
+  await assumption.selectOption({label:choice});
+  await expect(assumption).toHaveValue(value);
+  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Pensions',level:1})).toBeVisible();
+  await page.reload();
+  await page.getByRole('button',{name:'Back',exact:true}).click();
+  await expect(assumption).toHaveValue(value);
 });
 
 test('expense add/edit validates dates, Cancel leaves data alone, and Undo restores removed data',async({page})=>{
