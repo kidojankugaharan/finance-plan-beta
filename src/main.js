@@ -9,7 +9,7 @@ import * as goals from './ui/goals.js';
 import * as analysis from './ui/analysis.js';
 import * as more from './ui/more.js';
 import * as lessons from './ui/lessons.js';
-import {escape,notify,listen,openEditor,download} from './ui/shared.js';
+import {escape,notify,listen,openEditor,download,navIcon,info} from './ui/shared.js';
 
 import {mortgageNotice} from './ui/budget-check.js';
 
@@ -59,10 +59,13 @@ function render() {
   const ctx={today:()=>new Date(),state:s,store,engine,result,year:selectedYear,navigate,update,refresh,exportBackup,importBackup,setYear:y=>{selectedYear=y;render();}};
   document.documentElement.dataset.theme=s.ui.theme||'synthwave';
   const view=inSetup?setup:tabs[active];
-  document.getElementById('app').innerHTML=`<header class="app-header"><a href="#year" id="brand" class="brand"><span class="brand-icon">↗</span><span>Finance Plan<small>CANADA · LOCAL DATA</small></span></a><div class="save-state"><span>${store.error?'Not saved':store.updatedAt?'Saved on device':'Local only'}</span><small id="offline-state">${offlineReady?'Ready offline':'Offline cache pending'}</small></div></header>${store.error?`<aside class="save-error" role="alert">${escape(store.error)} <button id="emergency-export">Download ${store.loadError?'stored data':'backup'}</button></aside>`:''}${!inSetup&&!s.setup.completed?'<aside class="draft-banner">Your setup is a draft. <button id="resume-banner" class="text-button">Resume setup</button></aside>':''}<main id="main" tabindex="-1">${store.loadError?'<h1>Recover your plan</h1><p>Your saved data remains on this device. Import a valid backup to continue.</p><button id="recover-import">Import backup</button>':view.render(ctx)}</main>${!inSetup&&!store.loadError?`<nav class="main-nav" aria-label="Main navigation">${Object.entries(labels).filter(([id])=>!['lessons','goals','analysis'].includes(id)).map(([id,label])=>`<button data-tab="${id}" class="${active===id||(id==='more'&&['lessons','goals','analysis'].includes(active))?'active':''}" ${active===id||(id==='more'&&['lessons','goals','analysis'].includes(active))?'aria-current="page"':''}>${label}</button>`).join('')}</nav><footer class="app-footer">Private by design. Stored on this device. <button id="quick-backup" class="text-button">Export backup</button>${store.history.length?'<button id="undo-last" class="text-button">Undo last change</button>':''}</footer>`:''}`;
+  document.getElementById('app').innerHTML=`<div class="local-status" aria-label="Storage status"><span>${store.error?'Not saved':'Local only'}</span><span id="offline-state">${offlineReady?'Ready offline':'Offline cache pending'}</span></div>${store.error?`<aside class="save-error" role="alert">${escape(store.error)} <button id="emergency-export">Download ${store.loadError?'stored data':'backup'}</button></aside>`:''}${!inSetup&&!s.setup.completed?'<aside class="draft-banner">Your setup is a draft. <button id="resume-banner" class="text-button">Resume setup</button></aside>':''}<main id="main" tabindex="-1">${store.loadError?'<h1>Recover your plan</h1><p>Your saved data remains on this device. Import a valid backup to continue.</p><button id="recover-import">Import backup</button>':view.render(ctx)}</main>${!inSetup&&!store.loadError?`<nav class="main-nav" aria-label="Main navigation">${['budget','salary','year','invest','more'].map(id=>[id,labels[id]]).map(([id,label])=>`<button data-tab="${id}" class="${active===id||(id==='more'&&['lessons','goals','analysis'].includes(active))?'active':''}" ${active===id||(id==='more'&&['lessons','goals','analysis'].includes(active))?'aria-current="page"':''}><span class="nav-icon">${navIcon(id)}</span><span>${label}</span></button>`).join('')}</nav><footer class="app-footer">Private by design. Stored on this device. <button id="quick-backup" class="text-button">Export backup</button>${store.history.length?'<button id="undo-last" class="text-button">Undo last change</button>':''}</footer>`:''}`;
+  if(!inSetup)document.querySelectorAll('main > .card > p:not(.warning),main > .more-grid > .card > p:not(.warning),main > .card > form > p.hint').forEach(p=>{
+    if(p.textContent.length<100)return;
+    const holder=document.createElement('div');holder.className='note-help';holder.innerHTML=info('Details',p.outerHTML);p.replaceWith(holder);
+  });
   document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.tab)));
   document.querySelector('h1')?.setAttribute('tabindex','-1');
-  listen('brand','click',e=>{e.preventDefault();if(!inSetup)navigate('year');});
   listen('resume-banner','click',()=>update('Resumed setup',s=>{s.setup.paused=false;}));
   listen('quick-backup','click',exportBackup);listen('recover-import','click',importBackup);
   listen('emergency-export','click',()=>store.loadError?download('finance-plan-recovery.json',store.raw()):exportBackup());
@@ -70,6 +73,8 @@ function render() {
   if(!store.loadError)view.bind(ctx);
 }
 window.addEventListener('hashchange',()=>{const tab=location.hash.slice(1);if(tabs[tab]){active=tab;render();}});
+document.addEventListener('click',e=>document.querySelectorAll('.info[open]').forEach(el=>{if(!el.contains(e.target))el.open=false;}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.info[open]').forEach(el=>{el.open=false;el.querySelector('summary').focus();});});
 window.addEventListener('storage',e=>{if(e.key==='finance-plan-beta.v1')notify('This plan changed in another tab. Reload before editing to avoid overwriting it.',true);});
 try{refresh();}catch(error){document.getElementById('app').innerHTML='<main><h1>The plan could not be calculated</h1><p>Your saved data has not been changed.</p><button id="recover-import">Import backup</button><button id="emergency-export">Download stored data</button></main>';listen('recover-import','click',importBackup);listen('emergency-export','click',()=>download('finance-plan-recovery.json',store.raw()));notify(error.message,true);}
 if('serviceWorker' in navigator && !import.meta.env?.DEV){
