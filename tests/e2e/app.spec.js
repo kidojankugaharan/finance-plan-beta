@@ -10,8 +10,8 @@ async function setupPlan(page,{second=false}={}) {
   if(second){await page.getByLabel('Second person’s name (optional)').fill('Morgan');await page.getByLabel('Second person’s age',{exact:true}).fill('33');}
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await expect(page.locator('#setup-form .income-notice')).toContainText('Freelance and self-employment tax treatment is not modelled.');
-  await page.getByLabel('Taylor · annual salary').fill('80000');
-  if(second)await page.getByLabel('Morgan · annual salary').fill('60000');
+  await page.getByLabel('Taylor · annual employee salary').fill('80000');
+  if(second)await page.getByLabel('Morgan · annual employee salary').fill('60000');
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await page.getByLabel('Expense name',{exact:true}).fill('Housing');
   await page.getByLabel('Monthly amount',{exact:true}).fill('2000');
@@ -83,7 +83,7 @@ test('freelance income discloses employee approximation in setup, salary, editor
   const disclosure=await notice.textContent();
   await page.getByRole('button',{name:'Edit this year'}).click();
   await expect(dialog.locator('.income-notice')).toHaveText(disclosure);
-  await dialog.getByLabel('Taylor · annual salary').fill('72000');
+  await dialog.getByLabel('Taylor · annual employee salary').fill('72000');
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(page.locator('main')).toContainText('Employee CPP/QPP · EI · QPIP (estimated)');
   await expect(page.locator('main > .metrics')).toContainText('Employee payroll / pension estimate');
@@ -98,6 +98,51 @@ test('freelance income discloses employee approximation in setup, salary, editor
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.review')).toContainText('$132,000');
   await expect(dialog.locator('.review')).toContainText('Quebec');
+});
+
+test('Quebec freelance cash flow stays separate from employee salary and payroll deductions',async({page})=>{
+  await setupPlan(page,{second:true});
+  await nav(page,'more');
+  await page.getByRole('button',{name:'Household & province',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByLabel('Province or territory').selectOption('QC');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await nav(page,'salary');
+  await page.getByRole('button',{name:'Edit this year',exact:true}).click();
+  await dialog.getByLabel(/Taylor .* annual employee salary/).fill('0');
+  await dialog.getByLabel(/Morgan .* annual employee salary/).fill('58000');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  const freelanceBreakdown=page.locator('.person-grid section').first();
+  await expect(freelanceBreakdown.getByText('Employee gross / pension income',{exact:true}).locator('+ dd')).toHaveText('$0');
+  await expect(freelanceBreakdown.getByText(/Employee CPP/).locator('+ dd')).toHaveText('$0');
+  const payrollMetrics=await page.locator('main > .metrics').textContent();
+  await nav(page,'year');
+  const income=()=>page.locator('main > .metrics .metric').first().locator('strong').textContent();
+  const before=Number((await income()).replace(/[^0-9.-]/g,''));
+  await nav(page,'salary');
+  await page.getByRole('button',{name:'Add after-tax freelance income',exact:true}).click();
+  await expect(dialog).toContainText('remove any freelance receipts there first to avoid double counting');
+  await expect(dialog.getByLabel('Type',{exact:true})).toHaveValue('income');
+  await expect(dialog.getByLabel('Repeat',{exact:true})).toHaveValue('monthly');
+  await expect(dialog.getByLabel('Start month',{exact:true})).toHaveValue('2026-01');
+  await expect(dialog.getByLabel('End month',{exact:true})).toHaveValue('2026-12');
+  // Synthetic independently supplied net amount, not a self-employment tax estimate.
+  await dialog.getByLabel('Amount per occurrence (CAD)',{exact:true}).fill('4000');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(page.locator('main > .metrics')).toHaveText(payrollMetrics);
+  await page.reload();
+  await nav(page,'year');
+  expect(Number((await income()).replace(/[^0-9.-]/g,''))).toBe(before);
+  await expect(page.locator('main > .metrics .metric').filter({hasText:'Extra income / expenses (net)'}).locator('strong')).toHaveText('$48,000');
+  await expect(page.locator('.month-card').first()).toContainText('Freelance income (after tax): +$4,000');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state);
+  expect(saved.years[0].grossA).toBe(0);
+  expect(saved.years[0].grossB).toBe(58000);
+  expect(saved.years[0].months.every(m=>m.extraEntries.length===1&&m.extraEntries[0].amount===4000&&m.extraEntries[0].person==='A')).toBe(true);
+  await nav(page,'more');
+  await page.getByRole('button',{name:'Review setup',exact:true}).click();
+  await expect(dialog).toContainText('Do not include freelance receipts in annual salary');
+  await expect(dialog.locator('.review')).toContainText('$58,000');
 });
 
 test('Review setup shows saved assumptions without changing a completed plan',async({page})=>{
