@@ -1,0 +1,1226 @@
+{
+ "workingCouple": [
+  {
+   "year": 2026,
+   "grossA": 95000,
+   "grossB": 70000,
+   "afterTax": 124501,
+   "expenses": 47400,
+   "netWorth": 192891,
+   "tfsa": 44940,
+   "rrsp": 58850
+  },
+  {
+   "year": 2027,
+   "grossA": 96900,
+   "grossB": 71400,
+   "afterTax": 127075,
+   "expenses": 48585,
+   "netWorth": 278646,
+   "tfsa": 48086,
+   "rrsp": 62970
+  },
+  {
+   "year": 2028,
+   "grossA": 98838,
+   "grossB": 72828,
+   "afterTax": 129668,
+   "expenses": 49800,
+   "netWorth": 366288,
+   "tfsa": 51452,
+   "rrsp": 67377
+  },
+  {
+   "year": 2029,
+   "grossA": 100815,
+   "grossB": 74285,
+   "afterTax": 132233,
+   "expenses": 51045,
+   "netWorth": 455795,
+   "tfsa": 55053,
+   "rrsp": 72094
+  },
+  {
+   "year": 2030,
+   "grossA": 102831,
+   "grossB": 75770,
+   "afterTax": 134974,
+   "expenses": 52321,
+   "netWorth": 547349,
+   "tfsa": 58907,
+   "rrsp": 77140
+  },
+  {
+   "year": 2031,
+   "grossA": 104888,
+   "grossB": 77286,
+   "afterTax": 137772,
+   "expenses": 53629,
+   "netWorth": 641015,
+   "tfsa": 63031,
+   "rrsp": 82540
+  },
+  {
+   "year": 2032,
+   "grossA": 106985,
+   "grossB": 78831,
+   "afterTax": 140628,
+   "expenses": 54969,
+   "netWorth": 736864,
+   "tfsa": 67443,
+   "rrsp": 88318
+  },
+  {
+   "year": 2033,
+   "grossA": 109125,
+   "grossB": 80408,
+   "afterTax": 143543,
+   "expenses": 56344,
+   "netWorth": 834966,
+   "tfsa": 72164,
+   "rrsp": 94500
+  },
+  {
+   "year": 2034,
+   "grossA": 111308,
+   "grossB": 82016,
+   "afterTax": 146519,
+   "expenses": 57752,
+   "netWorth": 935399,
+   "tfsa": 77215,
+   "rrsp": 101115
+  },
+  {
+   "year": 2035,
+   "grossA": 113534,
+   "grossB": 83656,
+   "afterTax": 149556,
+   "expenses": 59196,
+   "netWorth": 1038242,
+   "tfsa": 82620,
+   "rrsp": 108193
+  },
+  {
+   "year": 2036,
+   "grossA": 115804,
+   "grossB": 85330,
+   "afterTax": 152655,
+   "expenses": 60676,
+   "netWorth": 1143578,
+   "tfsa": 88404,
+   "rrsp": 115767
+  },
+  {
+   "year": 2037,
+   "grossA": 118121,
+   "grossB": 87036,
+   "afterTax": 155819,
+   "expenses": 62193,
+   "netWorth": 1251496,
+   "tfsa": 94592,
+   "rrsp": 123871
+  },
+  {
+   "year": 2038,
+   "grossA": 120483,
+   "grossB": 88777,
+   "afterTax": 159048,
+   "expenses": 63748,
+   "netWorth": 1362089,
+   "tfsa": 101213,
+   "rrsp": 132541
+  },
+  {
+   "year": 2039,
+   "grossA": 122893,
+   "grossB": 90552,
+   "afterTax": 162345,
+   "expenses": 65341,
+   "netWorth": 1475455,
+   "tfsa": 108298,
+   "rrsp": 141819
+  },
+  {
+   "year": 2040,
+   "grossA": 125350,
+   "grossB": 92364,
+   "afterTax": 165709,
+   "expenses": 66975,
+   "netWorth": 1591698,
+   "tfsa": 115879,
+   "rrsp": 151747
+  },
+  {
+   "year": 2041,
+   "grossA": 127857,
+   "grossB": 94211,
+   "afterTax": 169143,
+   "expenses": 68649,
+   "netWorth": 1710925,
+   "tfsa": 123991,
+   "rrsp": 162369
+  },
+  {
+   "year": 2042,
+   "grossA": 130415,
+   "grossB": 96095,
+   "afterTax": 172648,
+   "expenses": 70366,
+   "netWorth": 1833253,
+   "tfsa": 132670,
+   "rrsp": 173735
+  },
+  {
+   "year": 2043,
+   "grossA": 133023,
+   "grossB": 98017,
+   "afterTax": 176226,
+   "expenses": 72125,
+   "netWorth": 1958802,
+   "tfsa": 141957,
+   "rrsp": 185896
+  },
+  {
+   "year": 2044,
+   "grossA": 135683,
+   "grossB": 99977,
+   "afterTax": 179878,
+   "expenses": 73928,
+   "netWorth": 2087702,
+   "tfsa": 151894,
+   "rrsp": 198909
+  },
+  {
+   "year": 2045,
+   "grossA": 138397,
+   "grossB": 101977,
+   "afterTax": 183605,
+   "expenses": 75776,
+   "netWorth": 2220087,
+   "tfsa": 162527,
+   "rrsp": 212833
+  },
+  {
+   "year": 2046,
+   "grossA": 141165,
+   "grossB": 104016,
+   "afterTax": 187410,
+   "expenses": 77670,
+   "netWorth": 2356102,
+   "tfsa": 173904,
+   "rrsp": 227731
+  },
+  {
+   "year": 2047,
+   "grossA": 143988,
+   "grossB": 106097,
+   "afterTax": 191293,
+   "expenses": 79612,
+   "netWorth": 2495897,
+   "tfsa": 186077,
+   "rrsp": 243672
+  },
+  {
+   "year": 2048,
+   "grossA": 146868,
+   "grossB": 108219,
+   "afterTax": 195257,
+   "expenses": 81602,
+   "netWorth": 2639634,
+   "tfsa": 199102,
+   "rrsp": 260729
+  },
+  {
+   "year": 2049,
+   "grossA": 149805,
+   "grossB": 110383,
+   "afterTax": 199308,
+   "expenses": 83643,
+   "netWorth": 2787488,
+   "tfsa": 213039,
+   "rrsp": 278980
+  },
+  {
+   "year": 2050,
+   "grossA": 152802,
+   "grossB": 112591,
+   "afterTax": 203436,
+   "expenses": 85734,
+   "netWorth": 2939632,
+   "tfsa": 227952,
+   "rrsp": 298509
+  },
+  {
+   "year": 2051,
+   "grossA": 155858,
+   "grossB": 114842,
+   "afterTax": 207582,
+   "expenses": 87877,
+   "netWorth": 3096189,
+   "tfsa": 243909,
+   "rrsp": 319404
+  },
+  {
+   "year": 2052,
+   "grossA": 158975,
+   "grossB": 117139,
+   "afterTax": 211815,
+   "expenses": 90074,
+   "netWorth": 3257363,
+   "tfsa": 260982,
+   "rrsp": 341763
+  },
+  {
+   "year": 2053,
+   "grossA": 162154,
+   "grossB": 119482,
+   "afterTax": 216136,
+   "expenses": 92326,
+   "netWorth": 3423366,
+   "tfsa": 279251,
+   "rrsp": 365686
+  },
+  {
+   "year": 2054,
+   "grossA": 165397,
+   "grossB": 121872,
+   "afterTax": 220548,
+   "expenses": 94634,
+   "netWorth": 3594425,
+   "tfsa": 298799,
+   "rrsp": 391284
+  },
+  {
+   "year": 2055,
+   "grossA": 168705,
+   "grossB": 124309,
+   "afterTax": 225051,
+   "expenses": 97000,
+   "netWorth": 3770783,
+   "tfsa": 319715,
+   "rrsp": 418674
+  },
+  {
+   "year": 2056,
+   "grossA": 172079,
+   "grossB": 126795,
+   "afterTax": 229649,
+   "expenses": 99425,
+   "netWorth": 3952694,
+   "tfsa": 342095,
+   "rrsp": 447981
+  },
+  {
+   "year": 2057,
+   "grossA": 175521,
+   "grossB": 129331,
+   "afterTax": 235715,
+   "expenses": 101910,
+   "netWorth": 4141804,
+   "tfsa": 366041,
+   "rrsp": 479340
+  },
+  {
+   "year": 2058,
+   "grossA": 179031,
+   "grossB": 131918,
+   "afterTax": 240565,
+   "expenses": 104458,
+   "netWorth": 4337088,
+   "tfsa": 391664,
+   "rrsp": 512894
+  },
+  {
+   "year": 2059,
+   "grossA": 61535,
+   "grossB": 57553,
+   "afterTax": 116891,
+   "expenses": 107070,
+   "netWorth": 4410229,
+   "tfsa": 419081,
+   "rrsp": 548796
+  },
+  {
+   "year": 2060,
+   "grossA": 63074,
+   "grossB": 58992,
+   "afterTax": 119844,
+   "expenses": 109746,
+   "netWorth": 4488077,
+   "tfsa": 448416,
+   "rrsp": 587212
+  },
+  {
+   "year": 2061,
+   "grossA": 64650,
+   "grossB": 60467,
+   "afterTax": 122870,
+   "expenses": 112490,
+   "netWorth": 4570951,
+   "tfsa": 479806,
+   "rrsp": 628317
+  },
+  {
+   "year": 2062,
+   "grossA": 66267,
+   "grossB": 61978,
+   "afterTax": 125971,
+   "expenses": 115302,
+   "netWorth": 4659189,
+   "tfsa": 513392,
+   "rrsp": 672299
+  },
+  {
+   "year": 2063,
+   "grossA": 67923,
+   "grossB": 63528,
+   "afterTax": 129151,
+   "expenses": 118185,
+   "netWorth": 4753153,
+   "tfsa": 549329,
+   "rrsp": 719360
+  },
+  {
+   "year": 2064,
+   "grossA": 69621,
+   "grossB": 65116,
+   "afterTax": 132409,
+   "expenses": 121139,
+   "netWorth": 4847662,
+   "tfsa": 587782,
+   "rrsp": 741936
+  },
+  {
+   "year": 2065,
+   "grossA": 71362,
+   "grossB": 66744,
+   "afterTax": 135750,
+   "expenses": 124168,
+   "netWorth": 4946531,
+   "tfsa": 628927,
+   "rrsp": 764980
+  },
+  {
+   "year": 2066,
+   "grossA": 73146,
+   "grossB": 68413,
+   "afterTax": 139023,
+   "expenses": 127272,
+   "netWorth": 5047739,
+   "tfsa": 672952,
+   "rrsp": 776551
+  },
+  {
+   "year": 2067,
+   "grossA": 77493,
+   "grossB": 70123,
+   "afterTax": 144444,
+   "expenses": 130454,
+   "netWorth": 5154860,
+   "tfsa": 720059,
+   "rrsp": 787250
+  },
+  {
+   "year": 2068,
+   "grossA": 79430,
+   "grossB": 71876,
+   "afterTax": 148089,
+   "expenses": 133715,
+   "netWorth": 5266056,
+   "tfsa": 770463,
+   "rrsp": 796957
+  },
+  {
+   "year": 2069,
+   "grossA": 81416,
+   "grossB": 76319,
+   "afterTax": 153756,
+   "expenses": 137058,
+   "netWorth": 5383495,
+   "tfsa": 824395,
+   "rrsp": 805550
+  },
+  {
+   "year": 2070,
+   "grossA": 83451,
+   "grossB": 78227,
+   "afterTax": 157638,
+   "expenses": 140485,
+   "netWorth": 5505367,
+   "tfsa": 882103,
+   "rrsp": 812794
+  },
+  {
+   "year": 2071,
+   "grossA": 85538,
+   "grossB": 80182,
+   "afterTax": 161616,
+   "expenses": 143997,
+   "netWorth": 5631859,
+   "tfsa": 943850,
+   "rrsp": 818625
+  },
+  {
+   "year": 2072,
+   "grossA": 87676,
+   "grossB": 82187,
+   "afterTax": 165694,
+   "expenses": 147597,
+   "netWorth": 5763128,
+   "tfsa": 1009920,
+   "rrsp": 822763
+  },
+  {
+   "year": 2073,
+   "grossA": 89868,
+   "grossB": 84241,
+   "afterTax": 169874,
+   "expenses": 151286,
+   "netWorth": 5899366,
+   "tfsa": 1080614,
+   "rrsp": 825062
+  },
+  {
+   "year": 2074,
+   "grossA": 92115,
+   "grossB": 86347,
+   "afterTax": 174158,
+   "expenses": 155069,
+   "netWorth": 6040761,
+   "tfsa": 1156257,
+   "rrsp": 825313
+  },
+  {
+   "year": 2075,
+   "grossA": 94418,
+   "grossB": 88506,
+   "afterTax": 178550,
+   "expenses": 158945,
+   "netWorth": 6187502,
+   "tfsa": 1237195,
+   "rrsp": 823229
+  },
+  {
+   "year": 2076,
+   "grossA": 96778,
+   "grossB": 90719,
+   "afterTax": 183051,
+   "expenses": 162919,
+   "netWorth": 6339798,
+   "tfsa": 1323799,
+   "rrsp": 818598
+  },
+  {
+   "year": 2077,
+   "grossA": 99197,
+   "grossB": 92987,
+   "afterTax": 187665,
+   "expenses": 166992,
+   "netWorth": 6497855,
+   "tfsa": 1416465,
+   "rrsp": 811128
+  },
+  {
+   "year": 2078,
+   "grossA": 101677,
+   "grossB": 95311,
+   "afterTax": 192394,
+   "expenses": 171167,
+   "netWorth": 6661886,
+   "tfsa": 1515617,
+   "rrsp": 800476
+  },
+  {
+   "year": 2079,
+   "grossA": 104219,
+   "grossB": 97694,
+   "afterTax": 197241,
+   "expenses": 175446,
+   "netWorth": 6831830,
+   "tfsa": 1621710,
+   "rrsp": 786382
+  },
+  {
+   "year": 2080,
+   "grossA": 106825,
+   "grossB": 100137,
+   "afterTax": 202210,
+   "expenses": 179832,
+   "netWorth": 7007878,
+   "tfsa": 1735230,
+   "rrsp": 768438
+  },
+  {
+   "year": 2081,
+   "grossA": 109495,
+   "grossB": 102640,
+   "afterTax": 207302,
+   "expenses": 184328,
+   "netWorth": 7190258,
+   "tfsa": 1856696,
+   "rrsp": 746253
+  },
+  {
+   "year": 2082,
+   "grossA": 112233,
+   "grossB": 105206,
+   "afterTax": 212523,
+   "expenses": 188936,
+   "netWorth": 7379206,
+   "tfsa": 1986665,
+   "rrsp": 719397
+  },
+  {
+   "year": 2083,
+   "grossA": 115039,
+   "grossB": 107836,
+   "afterTax": 217873,
+   "expenses": 193659,
+   "netWorth": 7574972,
+   "tfsa": 2125731,
+   "rrsp": 687431
+  },
+  {
+   "year": 2084,
+   "grossA": 117915,
+   "grossB": 110532,
+   "afterTax": 223357,
+   "expenses": 198501,
+   "netWorth": 7777807,
+   "tfsa": 2274533,
+   "rrsp": 649847
+  },
+  {
+   "year": 2085,
+   "grossA": 120862,
+   "grossB": 113295,
+   "afterTax": 228979,
+   "expenses": 203463,
+   "netWorth": 7987970,
+   "tfsa": 2433750,
+   "rrsp": 606099
+  },
+  {
+   "year": 2086,
+   "grossA": 123884,
+   "grossB": 116128,
+   "afterTax": 234741,
+   "expenses": 208550,
+   "netWorth": 8205716,
+   "tfsa": 2604112,
+   "rrsp": 555547
+  }
+ ],
+ "retiringCouple": [
+  {
+   "year": 2026,
+   "grossA": 60000,
+   "grossB": 40000,
+   "afterTax": 80153,
+   "expenses": 78000,
+   "netWorth": 856053,
+   "tfsa": 181900,
+   "rrsp": 642000
+  },
+  {
+   "year": 2027,
+   "grossA": 60000,
+   "grossB": 40000,
+   "afterTax": 80426,
+   "expenses": 79950,
+   "netWorth": 914203,
+   "tfsa": 194633,
+   "rrsp": 686940
+  },
+  {
+   "year": 2028,
+   "grossA": 0,
+   "grossB": 0,
+   "afterTax": 0,
+   "expenses": 81949,
+   "netWorth": 884904,
+   "tfsa": 208257,
+   "rrsp": 676646
+  },
+  {
+   "year": 2029,
+   "grossA": 25523,
+   "grossB": 0,
+   "afterTax": 25223,
+   "expenses": 83997,
+   "netWorth": 874821,
+   "tfsa": 222835,
+   "rrsp": 651986
+  },
+  {
+   "year": 2030,
+   "grossA": 26162,
+   "grossB": 20808,
+   "afterTax": 46621,
+   "expenses": 86097,
+   "netWorth": 885973,
+   "tfsa": 238434,
+   "rrsp": 647540
+  },
+  {
+   "year": 2031,
+   "grossA": 26816,
+   "grossB": 21328,
+   "afterTax": 47764,
+   "expenses": 88250,
+   "netWorth": 896735,
+   "tfsa": 255124,
+   "rrsp": 641611
+  },
+  {
+   "year": 2032,
+   "grossA": 27486,
+   "grossB": 21861,
+   "afterTax": 48935,
+   "expenses": 90456,
+   "netWorth": 907045,
+   "tfsa": 272983,
+   "rrsp": 634062
+  },
+  {
+   "year": 2033,
+   "grossA": 28173,
+   "grossB": 22408,
+   "afterTax": 50136,
+   "expenses": 92717,
+   "netWorth": 916614,
+   "tfsa": 292092,
+   "rrsp": 624523
+  },
+  {
+   "year": 2034,
+   "grossA": 28877,
+   "grossB": 22968,
+   "afterTax": 51367,
+   "expenses": 95035,
+   "netWorth": 925543,
+   "tfsa": 312538,
+   "rrsp": 613005
+  },
+  {
+   "year": 2035,
+   "grossA": 29599,
+   "grossB": 23542,
+   "afterTax": 52629,
+   "expenses": 97411,
+   "netWorth": 933754,
+   "tfsa": 334416,
+   "rrsp": 599338
+  },
+  {
+   "year": 2036,
+   "grossA": 30339,
+   "grossB": 24130,
+   "afterTax": 53922,
+   "expenses": 99847,
+   "netWorth": 941311,
+   "tfsa": 356111,
+   "rrsp": 582057
+  },
+  {
+   "year": 2037,
+   "grossA": 31098,
+   "grossB": 24734,
+   "afterTax": 55248,
+   "expenses": 102343,
+   "netWorth": 948618,
+   "tfsa": 380674,
+   "rrsp": 563312
+  },
+  {
+   "year": 2038,
+   "grossA": 31875,
+   "grossB": 25352,
+   "afterTax": 56627,
+   "expenses": 104901,
+   "netWorth": 955318,
+   "tfsa": 405573,
+   "rrsp": 543568
+  },
+  {
+   "year": 2039,
+   "grossA": 33933,
+   "grossB": 25986,
+   "afterTax": 59319,
+   "expenses": 107524,
+   "netWorth": 965960,
+   "tfsa": 407475,
+   "rrsp": 549708
+  },
+  {
+   "year": 2040,
+   "grossA": 34782,
+   "grossB": 27928,
+   "afterTax": 62110,
+   "expenses": 110212,
+   "netWorth": 977208,
+   "tfsa": 411605,
+   "rrsp": 555199
+  },
+  {
+   "year": 2041,
+   "grossA": 35651,
+   "grossB": 28627,
+   "afterTax": 63678,
+   "expenses": 112967,
+   "netWorth": 987751,
+   "tfsa": 415757,
+   "rrsp": 559920
+  },
+  {
+   "year": 2042,
+   "grossA": 36543,
+   "grossB": 29342,
+   "afterTax": 65252,
+   "expenses": 115791,
+   "netWorth": 997478,
+   "tfsa": 419930,
+   "rrsp": 563679
+  },
+  {
+   "year": 2043,
+   "grossA": 37456,
+   "grossB": 30076,
+   "afterTax": 66845,
+   "expenses": 118686,
+   "netWorth": 1006154,
+   "tfsa": 424204,
+   "rrsp": 566450
+  },
+  {
+   "year": 2044,
+   "grossA": 38393,
+   "grossB": 30828,
+   "afterTax": 68477,
+   "expenses": 121653,
+   "netWorth": 1013794,
+   "tfsa": 428366,
+   "rrsp": 568036
+  },
+  {
+   "year": 2045,
+   "grossA": 39352,
+   "grossB": 31598,
+   "afterTax": 70201,
+   "expenses": 124695,
+   "netWorth": 1020278,
+   "tfsa": 432626,
+   "rrsp": 568312
+  },
+  {
+   "year": 2046,
+   "grossA": 40336,
+   "grossB": 32388,
+   "afterTax": 71975,
+   "expenses": 127812,
+   "netWorth": 1025480,
+   "tfsa": 437003,
+   "rrsp": 567157
+  },
+  {
+   "year": 2047,
+   "grossA": 41345,
+   "grossB": 33198,
+   "afterTax": 73793,
+   "expenses": 131007,
+   "netWorth": 1029244,
+   "tfsa": 441546,
+   "rrsp": 564339
+  },
+  {
+   "year": 2048,
+   "grossA": 42378,
+   "grossB": 34028,
+   "afterTax": 75656,
+   "expenses": 134283,
+   "netWorth": 1031424,
+   "tfsa": 446271,
+   "rrsp": 559710
+  },
+  {
+   "year": 2049,
+   "grossA": 43438,
+   "grossB": 34879,
+   "afterTax": 77566,
+   "expenses": 137640,
+   "netWorth": 1031858,
+   "tfsa": 451183,
+   "rrsp": 553080
+  },
+  {
+   "year": 2050,
+   "grossA": 44524,
+   "grossB": 35751,
+   "afterTax": 79524,
+   "expenses": 141081,
+   "netWorth": 1030344,
+   "tfsa": 448062,
+   "rrsp": 544462
+  },
+  {
+   "year": 2051,
+   "grossA": 45637,
+   "grossB": 36644,
+   "afterTax": 81493,
+   "expenses": 144608,
+   "netWorth": 1026376,
+   "tfsa": 453710,
+   "rrsp": 533351
+  },
+  {
+   "year": 2052,
+   "grossA": 46778,
+   "grossB": 37561,
+   "afterTax": 83495,
+   "expenses": 148223,
+   "netWorth": 1019998,
+   "tfsa": 459640,
+   "rrsp": 519462
+  },
+  {
+   "year": 2053,
+   "grossA": 47947,
+   "grossB": 38500,
+   "afterTax": 85547,
+   "expenses": 151928,
+   "netWorth": 1010971,
+   "tfsa": 465918,
+   "rrsp": 502488
+  },
+  {
+   "year": 2054,
+   "grossA": 49146,
+   "grossB": 39462,
+   "afterTax": 87558,
+   "expenses": 155727,
+   "netWorth": 999101,
+   "tfsa": 472523,
+   "rrsp": 482126
+  },
+  {
+   "year": 2055,
+   "grossA": 50374,
+   "grossB": 40449,
+   "afterTax": 89773,
+   "expenses": 159620,
+   "netWorth": 984130,
+   "tfsa": 479814,
+   "rrsp": 458081
+  },
+  {
+   "year": 2056,
+   "grossA": 51634,
+   "grossB": 41460,
+   "afterTax": 92044,
+   "expenses": 163610,
+   "netWorth": 965777,
+   "tfsa": 487688,
+   "rrsp": 429983
+  },
+  {
+   "year": 2057,
+   "grossA": 52925,
+   "grossB": 42496,
+   "afterTax": 94371,
+   "expenses": 167701,
+   "netWorth": 943732,
+   "tfsa": 496233,
+   "rrsp": 397425
+  },
+  {
+   "year": 2058,
+   "grossA": 54248,
+   "grossB": 43559,
+   "afterTax": 96757,
+   "expenses": 171893,
+   "netWorth": 917634,
+   "tfsa": 505550,
+   "rrsp": 359938
+  },
+  {
+   "year": 2059,
+   "grossA": 55604,
+   "grossB": 44648,
+   "afterTax": 99202,
+   "expenses": 176190,
+   "netWorth": 887107,
+   "tfsa": 515750,
+   "rrsp": 317119
+  },
+  {
+   "year": 2060,
+   "grossA": 56994,
+   "grossB": 45764,
+   "afterTax": 101708,
+   "expenses": 180595,
+   "netWorth": 853448,
+   "tfsa": 526867,
+   "rrsp": 275535
+  },
+  {
+   "year": 2061,
+   "grossA": 58419,
+   "grossB": 46908,
+   "afterTax": 104277,
+   "expenses": 185110,
+   "netWorth": 817487,
+   "tfsa": 533497,
+   "rrsp": 239404
+  },
+  {
+   "year": 2062,
+   "grossA": 59879,
+   "grossB": 48081,
+   "afterTax": 106890,
+   "expenses": 189738,
+   "netWorth": 778688,
+   "tfsa": 531862,
+   "rrsp": 208011
+  },
+  {
+   "year": 2063,
+   "grossA": 61376,
+   "grossB": 49283,
+   "afterTax": 109459,
+   "expenses": 194481,
+   "netWorth": 736354,
+   "tfsa": 521888,
+   "rrsp": 180734
+  },
+  {
+   "year": 2064,
+   "grossA": 62911,
+   "grossB": 50515,
+   "afterTax": 112226,
+   "expenses": 199343,
+   "netWorth": 690102,
+   "tfsa": 503754,
+   "rrsp": 157034
+  },
+  {
+   "year": 2065,
+   "grossA": 64484,
+   "grossB": 51778,
+   "afterTax": 115061,
+   "expenses": 204327,
+   "netWorth": 639425,
+   "tfsa": 477508,
+   "rrsp": 136442
+  },
+  {
+   "year": 2066,
+   "grossA": 66096,
+   "grossB": 53072,
+   "afterTax": 117968,
+   "expenses": 209435,
+   "netWorth": 583798,
+   "tfsa": 443108,
+   "rrsp": 118550
+  },
+  {
+   "year": 2067,
+   "grossA": 67748,
+   "grossB": 54399,
+   "afterTax": 120947,
+   "expenses": 214671,
+   "netWorth": 522694,
+   "tfsa": 400449,
+   "rrsp": 103005
+  },
+  {
+   "year": 2068,
+   "grossA": 69442,
+   "grossB": 55759,
+   "afterTax": 124001,
+   "expenses": 220038,
+   "netWorth": 455715,
+   "tfsa": 349340,
+   "rrsp": 89498
+  },
+  {
+   "year": 2069,
+   "grossA": 71178,
+   "grossB": 57153,
+   "afterTax": 127131,
+   "expenses": 225539,
+   "netWorth": 382313,
+   "tfsa": 289697,
+   "rrsp": 77762
+  },
+  {
+   "year": 2070,
+   "grossA": 72957,
+   "grossB": 58582,
+   "afterTax": 130189,
+   "expenses": 231177,
+   "netWorth": 301869,
+   "tfsa": 221053,
+   "rrsp": 67565
+  },
+  {
+   "year": 2071,
+   "grossA": 74781,
+   "grossB": 60046,
+   "afterTax": 133477,
+   "expenses": 236956,
+   "netWorth": 213753,
+   "tfsa": 143316,
+   "rrsp": 58705
+  },
+  {
+   "year": 2072,
+   "grossA": 76651,
+   "grossB": 61547,
+   "afterTax": 136848,
+   "expenses": 242880,
+   "netWorth": 117298,
+   "tfsa": 55873,
+   "rrsp": 51007
+  },
+  {
+   "year": 2073,
+   "grossA": 78567,
+   "grossB": 63086,
+   "afterTax": 140303,
+   "expenses": 248952,
+   "netWorth": 3180,
+   "tfsa": 0,
+   "rrsp": 3180
+  },
+  {
+   "year": 2074,
+   "grossA": 80531,
+   "grossB": 64663,
+   "afterTax": 143844,
+   "expenses": 255176,
+   "netWorth": -108152,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2075,
+   "grossA": 82544,
+   "grossB": 66280,
+   "afterTax": 147474,
+   "expenses": 261556,
+   "netWorth": -222234,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2076,
+   "grossA": 84608,
+   "grossB": 67937,
+   "afterTax": 151195,
+   "expenses": 268094,
+   "netWorth": -339133,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2077,
+   "grossA": 86723,
+   "grossB": 69635,
+   "afterTax": 155008,
+   "expenses": 274797,
+   "netWorth": -458921,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2078,
+   "grossA": 88891,
+   "grossB": 71376,
+   "afterTax": 158917,
+   "expenses": 281667,
+   "netWorth": -581671,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2079,
+   "grossA": 91114,
+   "grossB": 73161,
+   "afterTax": 162774,
+   "expenses": 288708,
+   "netWorth": -707605,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2080,
+   "grossA": 93391,
+   "grossB": 74990,
+   "afterTax": 166881,
+   "expenses": 295926,
+   "netWorth": -836650,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2081,
+   "grossA": 95726,
+   "grossB": 76864,
+   "afterTax": 171091,
+   "expenses": 303324,
+   "netWorth": -968884,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2082,
+   "grossA": 98119,
+   "grossB": 78786,
+   "afterTax": 175405,
+   "expenses": 310907,
+   "netWorth": -1104386,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2083,
+   "grossA": 100572,
+   "grossB": 80756,
+   "afterTax": 179828,
+   "expenses": 318680,
+   "netWorth": -1243238,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2084,
+   "grossA": 103087,
+   "grossB": 82774,
+   "afterTax": 184361,
+   "expenses": 326647,
+   "netWorth": -1385524,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2085,
+   "grossA": 105664,
+   "grossB": 84844,
+   "afterTax": 189008,
+   "expenses": 334813,
+   "netWorth": -1531330,
+   "tfsa": 0,
+   "rrsp": 0
+  },
+  {
+   "year": 2086,
+   "grossA": 108305,
+   "grossB": 86965,
+   "afterTax": 193770,
+   "expenses": 343184,
+   "netWorth": -1680743,
+   "tfsa": 0,
+   "rrsp": 0
+  }
+ ]
+}

@@ -6,3 +6,6 @@ testers/*/screenshots/
 *base64*.txt
 google_client_id.txt
 .env
+.cache/
+test-results/
+playwright-report/

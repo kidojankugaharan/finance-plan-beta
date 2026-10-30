@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#100d24">
+    <meta name="description" content="A private, browser-based Canadian household budget and retirement planner.">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+    <link rel="stylesheet" href="./src/style.css">
+    <title>Finance Plan · Canada</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to plan</a>
+    <div id="app"></div>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <dialog id="editor" aria-labelledby="dialog-title"></dialog>
+    <noscript>Finance Plan needs JavaScript. Your data stays in this browser.</noscript>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
