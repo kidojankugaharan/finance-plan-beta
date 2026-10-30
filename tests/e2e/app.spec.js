@@ -191,6 +191,38 @@ test('JSON export/import previews replacement and can be reverted',async({page},
   await expect(page.locator('#notice')).toContainText('Import failed');await page.reload();await nav(page,'year');await expect(page.locator('main')).toContainText('Taylor');
 });
 
+test('backup chooser stays attached until selection or cancellation and can reopen',async({page},info)=>{
+  await setupPlan(page);await nav(page,'more');
+  const downloadPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Export JSON backup'}).click();
+  const download=await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^finance-plan-\d{4}-\d{2}-\d{2}\.json$/);
+  const file=info.outputPath(download.suggestedFilename());await download.saveAs(file);
+  const saved=await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'));
+  const openChooser=async()=>{
+    const event=page.waitForEvent('filechooser');
+    await page.getByRole('button',{name:'Import JSON backup',exact:true}).click();
+    const chooser=await event;
+    expect(await chooser.element().evaluate(input=>input.isConnected)).toBe(true);
+    return chooser;
+  };
+  const cancelled=await openChooser();
+  await cancelled.element().evaluate(input=>input.dispatchEvent(new Event('cancel')));
+  expect(await cancelled.element().evaluate(input=>input.isConnected)).toBe(false);
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  // Selecting the same dated export again must still open a fresh preview.
+  for(const confirm of [false,true]){
+    const chooser=await openChooser();await chooser.setFiles(file);
+    await expect(page.getByRole('dialog')).toContainText('Review backup import');
+    await expect(page.getByRole('dialog')).toContainText('Taylor');
+    expect(await chooser.element().evaluate(input=>input.isConnected)).toBe(false);
+    expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
+    await page.getByRole('button',{name:confirm?'Import this plan':'Cancel',exact:true}).click();
+  }
+  await expect(page.locator('#notice')).toContainText('Backup imported');
+  await expect(page.locator('input[type="file"]')).toHaveCount(0);
+});
+
 test('published subpath caches the complete app and reloads offline',async({page,context})=>{
   await setupPlan(page);await expect(page.locator('#offline-state')).toHaveText('Ready offline');
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
