@@ -297,9 +297,9 @@ test('expense add/edit validates dates, Cancel leaves data alone, and Undo resto
 
 test('investments use room, goals display a funding plan, and monthly overrides persist',async({page})=>{
   await setupPlan(page);await nav(page,'invest');
-  await page.getByLabel('Taylor · TFSA room').fill('7000');await page.getByLabel('Taylor · RRSP room').fill('14000');await page.getByRole('button',{name:'Save room',exact:true}).click();
+  await page.getByLabel('Taylor - TFSA room (CRA + records)').fill('7000');await page.getByLabel('Taylor - RRSP room (CRA + records)').fill('14000');await page.getByRole('button',{name:'Save contribution room',exact:true}).click();
   await page.getByLabel('When to invest',{exact:true}).selectOption('monthly');
-  await page.getByRole('button',{name:'Save investment plan'}).click();await expect(page.getByLabel('Taylor · TFSA room')).toHaveValue('7000');
+  await page.getByRole('button',{name:'Save investment plan'}).click();await expect(page.getByLabel('Taylor - TFSA room (CRA + records)')).toHaveValue('7000');
   await nav(page,'goals');await page.getByRole('button',{name:'Add goal'}).click();
   const dialog=page.getByRole('dialog');await dialog.getByLabel('Goal name or description').fill('Travel fund');await dialog.getByLabel('What are you aiming for?').selectOption('travelFund');
   await dialog.getByLabel('Target amount (CAD, %, months, or years)').fill('12000');await dialog.getByLabel('How to measure progress').selectOption('dedicated');await dialog.getByRole('button',{name:'Save changes'}).click();
