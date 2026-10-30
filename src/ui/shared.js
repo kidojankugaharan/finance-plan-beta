@@ -36,7 +36,12 @@ export function openEditor(title,body,onSave,saveLabel='Save changes') {
 export function yearOptions(s) { return s.years.map(y=>[y.year,y.year]); }
 export function download(filename,contents,type='application/json') {
   const url=URL.createObjectURL(new Blob([contents],{type}));
-  const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.hidden=true;
+  // Keep the link connected outside #app while the browser starts the download;
+  // exporting rerenders #app immediately after this function returns.
+  document.body.append(a);
+  try { a.click(); }
+  finally { setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},1000); }
 }
 export function chart(rows,key='netWorth') {
   if(!rows.length)return '';
