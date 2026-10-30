@@ -5,9 +5,9 @@ function computeAnnualAggregates(){
   return series.map((y)=>{
     const t = y.months.reduce((acc,m)=>{
       // Closed months suppress projected cash movements, but their recorded
-      // income and spending still belong in the full-year totals.
-      acc.earning+=m.displayEarning; acc.expense+=m.displayExpense; acc.extraNet+=m.extraNet;
-      acc.netCashFlow+=m.netCashFlow; acc.tfsaContrib+=m.tfsaContrib; acc.rrspContrib+=m.rrspContrib;
+      // income, spending, extras and savings still belong in full-year totals.
+      acc.earning+=m.displayEarning; acc.expense+=m.displayExpense; acc.extraNet+=m.displayExtraNet;
+      acc.netCashFlow+=m.displayNetCashFlow; acc.tfsaContrib+=m.tfsaContrib; acc.rrspContrib+=m.rrspContrib;
       acc.growth+=m.investGrowthIncome;
       acc.autoWithdrawalTotal+=Number(m.autoWithdrawalTotal)||0;
       return acc;
