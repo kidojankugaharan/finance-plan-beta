@@ -400,7 +400,7 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   const income=await annualTotals.nth(0).textContent(),expenses=await annualTotals.nth(1).textContent();
   const totalsBefore=await annualTotals.allTextContents();
   const februaryBefore=await page.locator('#month-1').textContent(),decemberBefore=await page.locator('#month-11').textContent();
-  await expect(page.locator('#closeout-reminder')).toContainText('2 past months are still open');
+  await expect(page.locator('#closeout-reminder')).toContainText('2 finished months (');
   await expect(page.locator('#close-3')).toHaveAttribute('aria-disabled','true');
   await page.locator('#close-3').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
   await page.locator('#close-2').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
@@ -422,7 +422,7 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await expect(projection.locator('td').nth(0)).toHaveText(income);
   await expect(projection.locator('td').nth(1)).toHaveText(expenses);
   await nav(page,'year');
-  await expect(page.locator('#closeout-reminder')).toContainText('1 past month is still open');
+  await expect(page.locator('#closeout-reminder')).toContainText('1 finished month (');
   await page.locator('#closeout-first').click();await dialog.getByRole('button',{name:'Skip'}).click();
   await expect(page.locator('#month-1')).toHaveCount(0);await expect(page.locator('#closeout-reminder')).toHaveCount(0);
   await expect(page.locator('#month-2')).toBeVisible();
