@@ -29,15 +29,22 @@ function exportBackup() {
   if(!store.loadError)store.markBackup();render();notify('Backup downloaded. Keep the file somewhere safe.');
 }
 function importBackup() {
-  const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
+  const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.hidden=true;
+  // Keep the picker connected and alive until the native chooser finishes.
+  // It lives outside #app so a render cannot detach it while choosing a file.
+  const cleanup=()=>input.remove();
+  input.addEventListener('cancel',cleanup,{once:true});
   input.addEventListener('change',async()=>{
-    if(!input.files?.[0])return;
+    const file=input.files?.[0];cleanup();
+    if(!file)return;
     try {
-      if(input.files[0].size>5_000_000)throw new Error('Choose a backup under 5 MB.');
-      const next=parseBackup(await input.files[0].text());
+      if(file.size>5_000_000)throw new Error('Choose a backup under 5 MB.');
+      const next=parseBackup(await file.text());
       openEditor('Review backup import',`<p>Replace your current plan with <strong>${escape(next.nameA||'Unnamed household')}${next.nameB?' & '+escape(next.nameB):''}</strong>?</p><p>Starting year: ${next.baseYear}. ${next.budgetItems.length} regular expenses and ${next.goals.length} goals.</p><p>The current plan is kept in Recent changes so you can revert this import. Download a backup first for a permanent copy.</p>`,()=>{store.restore(next);selectedYear=next.baseYear;refresh();notify('Backup imported. You can revert it in More.');},'Import this plan');
     } catch(error){notify('Import failed: '+error.message,true);}
-  });input.click();
+  },{once:true});
+  document.body.append(input);
+  try{input.click();}catch(error){cleanup();throw error;}
 }
 function navigate(tab) {if(!tabs[tab])return;active=tab;history.replaceState(null,'','#'+tab);render();window.scrollTo(0,0);document.querySelector('h1')?.focus();}
 function update(label,edit) {store.commit(label,edit);refresh();notify(store.error||'Saved · '+label,!!store.error);}
