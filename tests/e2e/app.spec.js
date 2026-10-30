@@ -34,19 +34,17 @@ async function nav(page,tab) {
   }else await page.locator(`[data-tab="${tab}"]`).click();
 }
 
-test('More Explore links open goals and projection when phone tabs are hidden',async({page,isMobile})=>{
+test('More Explore buttons open goals and projection on phone',async({page})=>{
   await setupPlan(page);
   const navigation=page.getByRole('navigation',{name:'Main navigation'});
   for(const [tab,title] of [['goals','Goals'],['analysis','Projection & analysis']]){
     await navigation.getByRole('button',{name:'More',exact:true}).click();
-    if(isMobile)await expect(navigation.locator('[data-tab="'+tab+'"]')).toBeHidden();
-    const link=page.getByRole('link',{name:title,exact:true});
+    await expect(navigation.locator('[data-tab="'+tab+'"]')).toHaveCount(0);
+    const link=page.getByRole('button',{name:title,exact:true});
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href','#'+tab);
     const box=await link.boundingBox();
     expect(box.height).toBeGreaterThanOrEqual(48);
-    if(isMobile)await link.tap();
-    else {await link.focus();await page.keyboard.press('Enter');}
+    await link.tap();
     await expect(page).toHaveURL(new RegExp('#'+tab+'$'));
     await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeFocused();
     await expect(page.getByRole('button',{name:tab==='goals'?'Add goal':'Export projection CSV',exact:true})).toBeVisible();
@@ -505,4 +503,59 @@ test('individual stop-work ages keep the younger partner earning in 2029',async(
   await expect(page.locator('.metrics')).toContainText('One retired');
   await page.getByLabel('Year',{exact:true}).selectOption('2032');
   await expect(lee).toContainText('Retired');
+});
+
+test('wide screens retain a centered phone column and all navigation',async({page},info)=>{
+  await page.setViewportSize({width:1440,height:844});
+  await setupPlan(page);
+  const app=await page.locator('#app').boundingBox();
+  expect(app.width).toBeLessThanOrEqual(430);
+  expect(app.x).toBeCloseTo((1440-app.width)/2,0);
+  const navigation=page.getByRole('navigation',{name:'Main navigation'});
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole('button')).toHaveCount(5);
+  const bar=await navigation.boundingBox();
+  expect(bar.width).toBe(app.width);
+  expect(bar.x).toBe(app.x);
+  expect(bar.y+bar.height).toBeCloseTo(844,0);
+  await page.screenshot({path:info.outputPath('wide-phone-layout.png'),fullPage:true});
+  for(const [tab,title] of [['goals','Goals'],['analysis','Projection & analysis']]){
+    await nav(page,tab);
+    await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeVisible();
+    await expect(navigation.getByRole('button',{name:'More',exact:true})).toHaveAttribute('aria-current','page');
+  }
+  await nav(page,'more');
+  await page.getByRole('button',{name:'Household & province',exact:true}).click();
+  expect((await page.getByRole('dialog').boundingBox()).width).toBeLessThanOrEqual(430);
+});
+
+test('every page, chart, table and editor fits a 360px phone',async({page},info)=>{
+  await page.setViewportSize({width:360,height:800});
+  await setupPlan(page,{second:true});
+  const fits=async()=>expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  for(const tab of ['year','salary','budget','invest','goals','analysis','more','lessons']){
+    if(tab==='lessons'){
+      await nav(page,'more');
+      await page.getByRole('button',{name:'Lessons learned',exact:true}).click();
+    }else await nav(page,tab);
+    await fits();
+    if(tab==='analysis'){
+      const table=page.locator('.table-scroll');
+      expect(await table.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
+      expect((await page.locator('.chart svg').boundingBox()).width).toBeLessThanOrEqual(328);
+      await page.screenshot({path:info.outputPath('projection-360.png'),fullPage:true});
+    }
+  }
+  for(const [tab,button] of [['year','Edit January'],['salary','Edit this year'],['budget','Add expense'],['goals','Add goal'],['more','Household & province']]){
+    await nav(page,tab);
+    await page.getByRole('button',{name:button,exact:true}).click();
+    const dialog=page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+    const box=await dialog.boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x+box.width).toBeLessThanOrEqual(360);
+    await fits();
+    await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
+  }
 });
