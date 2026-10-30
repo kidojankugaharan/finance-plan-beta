@@ -340,10 +340,21 @@ test('home-improvement goals default to a savings plan and distinguish metric ta
   await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
   await dialog.getByLabel('What are you aiming for?').selectOption('customNetWorth');
   await dialog.getByRole('button',{name:'Save changes'}).click();
-  await expect(goal).toContainText('Metric: target met');
+  await expect(goal).toContainText('Funding not assessed');
+  await expect(goal.locator('progress')).toHaveCount(0);
   await expect(goal).toContainText('does not show money earmarked or available for this goal');
   await page.reload();await nav(page,'goals');
   await expect(goal).toContainText('Household net worth');
   await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
   await expect(dialog.getByLabel('How to measure progress')).toHaveValue('automatic');
+  // Existing net-worth goals can be reassessed using only their savings schedule.
+  await dialog.getByLabel('How to measure progress').selectOption('dedicated');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(goal).toContainText('Dedicated goal savings');
+  await expect(goal).toContainText('Savings plan: Not reached');
+  await expect(goal).toContainText('Planned savings at target date: $0');
+  await expect(goal).not.toContainText('Funding not assessed');
+  await expect(goal.locator('progress')).toHaveAttribute('value','0');
+  await page.reload();await nav(page,'goals');
+  await expect(goal).toContainText('Planned savings at target date: $0');
 });
