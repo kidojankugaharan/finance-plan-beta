@@ -15,6 +15,8 @@ import * as invest from '../src/ui/invest.js';
 import * as goals from '../src/ui/goals.js';
 import * as analysis from '../src/ui/analysis.js';
 import * as more from '../src/ui/more.js';
+import * as lessons from '../src/ui/lessons.js';
+import {monthEnded,pendingMonths,closeMonth,sortedLessons} from '../src/closeout.js';
 
 const golden=JSON.parse(fs.readFileSync(new URL('./fixtures/projection-golden.json',import.meta.url),'utf8'));
 const near=(a,b,tol=.01)=>assert.ok(Math.abs(a-b)<=tol,`${a} vs ${b}`);
@@ -134,8 +136,9 @@ export function registerSuite(test) {
   test('all tabs and setup steps render without browser globals and escape user text',()=>{
     const e=scenario();e.state.nameA='<img src=x onerror=alert(1)>';const s=e.state;
     const result={annual:e.computeAnnualAggregates(),monthly:e.computeMonthlySeries(),salary:e.computeSalaryChain(),windows:e.resolveDrawdown().windows,goals:e.computeGoalResults()};
-    const c={state:s,engine:e,result,year:2026,store:{history:[],error:'',updatedAt:null,backupAt:null}};
-    for(const module of [year,salary,budget,invest,goals,analysis,more]){const html=module.render(c);assert.ok(html.length>100);assert.ok(!html.includes('<img src=x'));}
+    const c={today:()=>new Date(2026,5,15),state:s,engine:e,result,year:2026,store:{history:[],error:'',updatedAt:null,backupAt:null}};
+    s.lessons=[{id:'x',year:2026,month:0,at:'2026-02-01T00:00:00.000Z',note:'<img src=x onerror=alert(1)>'}];
+    for(const module of [year,salary,budget,invest,goals,analysis,more,lessons]){const html=module.render(c);assert.ok(html.length>100);assert.ok(!html.includes('<img src=x'));}
     s.setup.started=true;for(let i=0;i<7;i++){s.setup.step=i;assert.ok(setup.render(c).includes('setup-form'));}
   });
   test('engine instances do not share state or caches',()=>{
@@ -180,5 +183,33 @@ export function registerSuite(test) {
   test('temporarily hiding a second person preserves their saved manual contributions',()=>{
     let e=scenario();e.state.years[0].months[1].tfsaB=4321;e.state.singlePerson=true;e.state.nameB='';
     e=createEngine(e.state);assert.equal(e.state.years[0].months[1].tfsaB,4321);assert.equal(e.computeMonthlySeries()[0].months[1].tfsaB,0);
+  });
+  test('month close-out: only ended months close; note saved; future and current blocked',()=>{
+    const today=new Date(2026,2,15),e=createEngine({baseYear:2026,singlePerson:true}),st=e.state;
+    assert.equal(monthEnded(2026,1,today),true);assert.equal(monthEnded(2026,2,today),false);assert.equal(monthEnded(2026,3,today),false);assert.equal(monthEnded(2025,11,new Date(2026,0,1)),true);
+    assert.deepEqual(pendingMonths(st,today),[{year:2026,month:0},{year:2026,month:1}]);
+    assert.throws(()=>closeMonth(st,2026,2,'x',today),/after it ends/);assert.throws(()=>closeMonth(st,2026,8,'x',today),/after it ends/);
+    closeMonth(st,2026,0,'  Groceries ran high  ',today);closeMonth(st,2026,1,'   ',today);
+    assert.equal(st.years[0].months[0].locked,true);assert.equal(st.years[0].months[1].locked,true);
+    assert.equal(st.lessons.length,1);assert.equal(st.lessons[0].note,'Groceries ran high');assert.equal(st.lessons[0].month,0);
+    assert.deepEqual(pendingMonths(st,today),[]);assert.throws(()=>closeMonth(st,2026,0,'again',today),/already closed/);
+    assert.throws(()=>closeMonth(st,2026,0,'x'.repeat(1001),new Date(2027,0,1)),/already closed|under/);
+  });
+  test('closed months stay in projections and lessons list newest first',()=>{
+    const open=createEngine({baseYear:2026,singlePerson:true,startCashA:5000}),shut=createEngine(structuredClone(open.state));
+    closeMonth(shut.state,2026,0,'a',new Date(2026,1,2));
+    const a=createEngine(shut.state),b=a.computeAnnualAggregates();assert.equal(b.length,open.computeAnnualAggregates().length);
+    for(const v of Object.values(b[0]))if(typeof v==='number')assert.ok(Number.isFinite(v));
+    closeMonth(shut.state,2026,1,'b',new Date(2026,2,2));
+    assert.deepEqual(sortedLessons(shut.state).map(l=>l.note),['b','a']);
+  });
+  test('lessons learned survive store, JSON export/import, and are validated',()=>{
+    const e=createEngine({baseYear:2026,singlePerson:true});closeMonth(e.state,2026,0,'Cut takeout',new Date(2026,1,2));
+    const store=createStore(memory());store.commit('Close',s=>{Object.assign(s,structuredClone(e.state));});
+    assert.equal(store.state.lessons[0].note,'Cut takeout');
+    const back=parseBackup(backupJSON(store.state));assert.equal(back.lessons[0].note,'Cut takeout');assert.equal(back.years[0].months[0].locked,true);
+    const old=structuredClone(store.state);delete old.lessons;assert.deepEqual(createEngine(old).state.lessons,[]);
+    const bad=structuredClone(store.state);bad.lessons[0].month=12;assert.throws(()=>validatePlan(bad));
+    const bad2=structuredClone(store.state);bad2.lessons=[{id:'1',year:2026,month:0,at:'nope',note:'x'}];assert.throws(()=>validatePlan(bad2));
   });
 }

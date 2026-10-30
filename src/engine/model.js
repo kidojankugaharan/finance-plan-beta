@@ -85,6 +85,7 @@ let state = {
   goals:[],
   budgetItems: defaultBudgetItems(),
   budgetMode:"auto", budgetByYear:{},
+  lessons:[],
   years:[]
 };
 

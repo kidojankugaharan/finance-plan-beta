@@ -76,6 +76,13 @@ export function validatePlan(state) {
   if (!Array.isArray(state.budgetItems) || state.budgetItems.length > 500 || !Array.isArray(state.years) || state.years.length > 61 || !Array.isArray(state.goals) || state.goals.length > 100) throw new Error('Invalid plan lists.');
   state.budgetItems.forEach(validateExpense);
   for (const [year,list] of Object.entries(state.budgetByYear || {})) { integer(Number(year),2026,2086,'budget year');if (!Array.isArray(list) || list.length > 500) throw new Error('Invalid annual budget.'); list.forEach(validateExpense); }
+  if(state.lessons!==undefined){
+    if(!Array.isArray(state.lessons)||state.lessons.length>1000)throw new Error('Invalid lessons learned.');
+    for(const l of state.lessons){
+      if(!object(l)||typeof l.id!=='string'||typeof l.note!=='string'||l.note.length>1000||typeof l.at!=='string'||Number.isNaN(Date.parse(l.at)))throw new Error('Invalid lesson.');
+      integer(l.year,2026,2086,'lesson year');integer(l.month,0,11,'lesson month');
+    }
+  }
   if(state.archivedYears!==undefined&&(!Array.isArray(state.archivedYears)||state.archivedYears.length>61))throw new Error('Invalid archived years.');
   const seenYears=new Set();
   for (const y of [...state.years, ...(state.archivedYears || [])]) {
