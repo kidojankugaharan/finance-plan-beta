@@ -195,6 +195,27 @@ export function registerSuite(test) {
     assert.deepEqual(pendingMonths(st,today),[]);assert.throws(()=>closeMonth(st,2026,0,'again',today),/already closed/);
     assert.throws(()=>closeMonth(st,2026,0,'x'.repeat(1001),new Date(2027,0,1)),/already closed|under/);
   });
+  test('annual income and expenses include closed months and saved overrides',()=>{
+    for(const count of [1,2,12]){
+      const e=createEngine({baseYear:2026,singlePerson:true,investPct:0});
+      for(const m of e.state.years[0].months){m.earning=4199;m.expense=4300;}
+      for(let i=0;i<count;i++)closeMonth(e.state,2026,i,'',new Date(2027,0,2));
+      const restored=createEngine(parseBackup(backupJSON(e.state)));
+      const totals=restored.computeAnnualAggregates()[0];
+      assert.equal(totals.earning,50388);assert.equal(totals.expense,51600);
+    }
+  });
+  test('annual totals retain salary and budget estimates and zero overrides after close-out',()=>{
+    let e=createEngine({baseYear:2026,singlePerson:true,investPct:0,budgetItems:[expense('A','Living',4300)]});
+    e.state.years[0].grossA=65000;
+    e.state.years[0].months[0].earning=0;e.state.years[0].months[0].expense=0;
+    e=createEngine(e.state);
+    const before=e.computeAnnualAggregates()[0];
+    closeMonth(e.state,2026,0,'',new Date(2026,2,2));
+    closeMonth(e.state,2026,1,'',new Date(2026,2,2));
+    const after=createEngine(e.state).computeAnnualAggregates()[0];
+    near(after.earning,before.earning);near(after.expense,4300*11);
+  });
   test('closed months stay in projections and lessons list newest first',()=>{
     const open=createEngine({baseYear:2026,singlePerson:true,startCashA:5000}),shut=createEngine(structuredClone(open.state));
     closeMonth(shut.state,2026,0,'a',new Date(2026,1,2));

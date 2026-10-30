@@ -126,6 +126,8 @@ test('recurring extras and payday schedules change the intended unlocked months'
 test('closing an ended month saves a lesson, hides the month, and blocks current and future months',async({page})=>{
   await page.clock.setFixedTime(new Date('2026-03-15T12:00:00'));
   await setupPlan(page);
+  const annualTotals=page.locator('main > .metrics > .metric strong');
+  const income=await annualTotals.nth(0).textContent(),expenses=await annualTotals.nth(1).textContent();
   await expect(page.locator('#closeout-reminder')).toContainText('2 past months are still open');
   await expect(page.locator('#close-3')).toHaveAttribute('aria-disabled','true');
   await page.locator('#close-3').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
@@ -137,11 +139,13 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await expect(page.locator('#month-0')).toBeVisible();
   await page.locator('#close-0').click();await dialog.getByLabel(/Notes \/ lessons learned/).fill('Groceries ran over; budget $50 more.');await dialog.getByRole('button',{name:'Save',exact:true}).click();
   await expect(page.locator('#month-0')).toHaveCount(0);await expect(page.locator('#closed-note')).toContainText('1 closed month is hidden');
+  await expect(annualTotals.nth(0)).toHaveText(income);await expect(annualTotals.nth(1)).toHaveText(expenses);
   await expect(page.locator('#closeout-reminder')).toContainText('1 past month is still open');
   await page.locator('#closeout-first').click();await dialog.getByRole('button',{name:'Skip'}).click();
   await expect(page.locator('#month-1')).toHaveCount(0);await expect(page.locator('#closeout-reminder')).toHaveCount(0);
   await expect(page.locator('#month-2')).toBeVisible();
   await page.reload();await expect(page.locator('#month-0')).toHaveCount(0);
+  await expect(annualTotals.nth(0)).toHaveText(income);await expect(annualTotals.nth(1)).toHaveText(expenses);
   await nav(page,'more');await page.getByRole('button',{name:'Lessons learned'}).click();
   await expect(page.getByRole('heading',{name:'Lessons learned',level:1})).toBeVisible();
   await expect(page.locator('.lessons li')).toHaveCount(1);await expect(page.locator('.lessons')).toContainText('January 2026');await expect(page.locator('.lessons')).toContainText('Groceries ran over');
