@@ -4,5 +4,5 @@ export default defineConfig({
   globalSetup:'./tests/e2e/global-setup.js',
   reporter:[['list'],['html',{open:'never'}]],
   use:{baseURL:'http://127.0.0.1:4173/finance-plan-beta/',trace:'retain-on-failure'},
-  projects:[{name:'phone',use:{...devices['iPhone 13'],defaultBrowserType:'chromium'}},{name:'desktop',use:{...devices['Desktop Chrome']}}]
+  projects:[{name:'phone',use:{...devices['iPhone 13'],defaultBrowserType:'chromium'}}]
 });

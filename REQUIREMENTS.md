@@ -6,6 +6,8 @@
 - v1 = feature parity with the personal app (setup, salary, budget, invest, goals, projection, More), minus Google Drive sync and any personal data/keys.
 - Apply the beginner-UX plan in `reference/UX-REVIEW-2026-10-26.md` where it fits.
 
+- Phone-only layout at every screen width (owner 2026-10-30)
+
 ## Platform & data
 - Web app / PWA, hosted on GitHub Pages from the public repo `finance-plan-beta`.
 - No accounts, no backend. Data saved in the browser (localStorage/IndexedDB) + JSON export/import.
