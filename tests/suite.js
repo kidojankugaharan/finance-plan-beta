@@ -105,7 +105,7 @@ export function registerSuite(test) {
     const q=createEngine({province:'QC'}).personTax({employment:150000,year:2026,age:40});near(q.cpp,4895.3);near(q.ei,895.7);near(q.qpip,442.9);
   });
   test('setup: pay growth is an explicit choice',()=>{
-    const s=freshPlan(),data={payGrowthChoice:'',inflationRate:'2',returnRateA:'5',retirementAge:'65',raiseA:'4'};
+    const s=freshPlan(),data={payGrowthChoice:'',inflationRate:'2',returnRateA:'5',retirementAgeA:'65',raiseA:'4'};
     assert.throws(()=>readAssumptions(s,data));readAssumptions(s,{...data,payGrowthChoice:'inflation'});assert.equal(s.raiseA,2);
     readAssumptions(s,{...data,payGrowthChoice:'unsure'});assert.equal(s.raiseA,0);assert.equal(s.payGrowthChoice,'unsure');
   });

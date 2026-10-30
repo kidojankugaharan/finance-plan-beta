@@ -14,7 +14,7 @@ const OAS_2026_ANNUAL_65_74 = 3*(742.31 + 743.05 + 751.97 + 762.50);
 
 const OAS_2026_ANNUAL_75_PLUS = 3*(816.54 + 817.36 + 827.17 + 838.75);
 
-function retirementStartYear(){
+function legacyRetirementStartYear(){
   const base = Number(state?.baseYear);
   const retirementAge = Number(state?.retirementAge);
   const ages = [Number(state?.ageA), ...(state?.singlePerson ? [] : [Number(state?.ageB)])].filter(v=>Number.isFinite(v) && v>0); // a blank age counts as "not entered", so one-person households work
@@ -24,6 +24,18 @@ function retirementStartYear(){
   return Math.round(base + Math.max(0, retirementAge - youngestAge));
 }
 
+// Missing individual ages retain the timing of existing v1 plans.
+function personRetirementStartYear(person){
+  const raw = state['retirementAge'+person];
+  if(raw===null || raw===undefined || raw==='') return legacyRetirementStartYear();
+  const age = state['age'+person];
+  if(age===null || age===undefined || age==='' || !Number.isFinite(Number(age))) return Infinity;
+  return Math.round(Number(state.baseYear) + Math.max(0, Number(raw)-Number(age)));
+}
+function retirementStartYear(){
+  return Math.max(personRetirementStartYear('A'), ...(state.singlePerson ? [] : [personRetirementStartYear('B')]));
+}
+api.personRetirementStartYear = personRetirementStartYear;
 function isRetirementYear(year){ return Number(year) >= retirementStartYear(); }
 
 function clampReturnPct(v){
@@ -749,5 +761,5 @@ function fmt(n){
   const v = Math.abs(rounded).toLocaleString("en-CA",{maximumFractionDigits:0});
   return (neg?"−$":"$")+v;
 }
-Object.assign(api, {PROJECTION_END_YEAR, PENSION_ESTIMATE_BASE_YEAR, CPP_MAX_MONTHLY_2026, OAS_MAX_MONTHLY_65_74_2026, OAS_MAX_MONTHLY_75_PLUS_2026, OAS_2026_ANNUAL_65_74, OAS_2026_ANNUAL_75_PLUS, retirementStartYear, isRetirementYear, clampReturnPct, inflationFraction, isValidBaseYear, defaultBrackets, makeDefaultMonths, defaultBudgetItems, state, ensureYearsRange, dbNextEntityId, goalCategoryCatalog, goalCatalog, goalLabel, firstGoalKeyForCategory, goalMetricCatalog, goalExistingBalanceCatalog, goalResolvedMetric, goalAnnualProjectionSeries, goalMonthlyProjectionSeries, goalBaselineDate, goalDefaultFundingStart, goalFundingIntervalMonths, goalFundingFrequencyLabel, goalFundingCandidateMonths, goalFundingSchedule, goalDedicatedSavingsAtSerial, goalValueAt, computeGoalResults, migrateLegacyGoalIdentity, ensureGoalsState, findYearIndexByYear, monthSerial, extraSerialToYearMonth, roundDollar, fmt});
+Object.assign(api, {PROJECTION_END_YEAR, PENSION_ESTIMATE_BASE_YEAR, CPP_MAX_MONTHLY_2026, OAS_MAX_MONTHLY_65_74_2026, OAS_MAX_MONTHLY_75_PLUS_2026, OAS_2026_ANNUAL_65_74, OAS_2026_ANNUAL_75_PLUS, retirementStartYear, personRetirementStartYear, isRetirementYear, clampReturnPct, inflationFraction, isValidBaseYear, defaultBrackets, makeDefaultMonths, defaultBudgetItems, state, ensureYearsRange, dbNextEntityId, goalCategoryCatalog, goalCatalog, goalLabel, firstGoalKeyForCategory, goalMetricCatalog, goalExistingBalanceCatalog, goalResolvedMetric, goalAnnualProjectionSeries, goalMonthlyProjectionSeries, goalBaselineDate, goalDefaultFundingStart, goalFundingIntervalMonths, goalFundingFrequencyLabel, goalFundingCandidateMonths, goalFundingSchedule, goalDedicatedSavingsAtSerial, goalValueAt, computeGoalResults, migrateLegacyGoalIdentity, ensureGoalsState, findYearIndexByYear, monthSerial, extraSerialToYearMonth, roundDollar, fmt});
 }

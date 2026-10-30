@@ -386,7 +386,8 @@ function projectedRrspNewRoom(yearIdx,accountId,salaryChain){
   // Only earned income (salary) creates room; CPP, OAS and other pension
   // income don't.
   const prior = salaryChain?.[yearIdx-1];
-  const priorGross = prior?.pensionActive ? 0 : Math.max(0,Number(personA ? prior?.grossA : prior?.grossB)||0);
+  const retired = prior?.[personA ? 'pensionActiveA' : 'pensionActiveB'] ?? prior?.pensionActive;
+  const priorGross = retired ? 0 : Math.max(0,Number(personA ? prior?.grossA : prior?.grossB)||0);
   const earned18 = priorGross*0.18;
   const published = CRA_RRSP_DOLLAR_LIMITS[currentYear]!==undefined;
   const publishedCap = indexedPublishedLimit(CRA_RRSP_DOLLAR_LIMITS, currentYear, 10);

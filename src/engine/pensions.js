@@ -1,11 +1,11 @@
 // Calculation logic ported from the reference; independent of browser APIs.
 export function registerPensions(api) {
-function computePensionModeChain(){
+function computePensionModeChain(person){
   let carry = null;
   return (api.state.years||[]).map(y=>{
     const manual = typeof y.pensionModeOverride==="boolean";
     if(manual) carry = y.pensionModeOverride;
-    const eligible = api.isRetirementYear(y.year);
+    const eligible = Number(y.year) >= (person ? api.personRetirementStartYear(person) : api.retirementStartYear());
     return {
       active: eligible && (carry ?? api.state.retirementAuto !== false),
       carried: carry,
@@ -112,6 +112,7 @@ function computeSalaryGrowthChain(){
 function computeSalaryPath(){
   const growthChain = computeSalaryGrowthChain();
   const pensionChain = computePensionModeChain();
+  const pensionA = computePensionModeChain('A'), pensionB = computePensionModeChain('B');
   let prevA = null, prevB = null;
   return api.state.years.map((y,idx)=>{
     const growth = growthChain[idx];
@@ -126,12 +127,12 @@ function computeSalaryPath(){
       salaryGrossB = api.state.singlePerson ? 0 : (set(y.grossB) ? Number(y.grossB) : prevB*(1+rate));
     }
     prevA = salaryGrossA; prevB = salaryGrossB;
-    return {year:y.year, salaryGrossA, salaryGrossB, growth, pension:pensionChain[idx] || {active:false,manual:false}};
+    return {year:y.year, salaryGrossA, salaryGrossB, growth, pensionA:pensionA[idx], pensionB:pensionB[idx], pension:pensionChain[idx] || {active:false,manual:false}};
   });
 }
 
 function salaryRowsFor(person, path){
-  return (path || computeSalaryPath()).map(r=>({year:r.year, salary:person==="B" ? r.salaryGrossB : r.salaryGrossA, pensionActive:!!r.pension.active}));
+  return (path || computeSalaryPath()).map(r=>({year:r.year, salary:person==="B" ? r.salaryGrossB : r.salaryGrossA, pensionActive:!!r['pension'+person].active}));
 }
 
 function computeSalaryChain(){
@@ -144,7 +145,7 @@ function computeSalaryChain(){
     const personRow = (person, salaryGross, cppShare)=>{
       const age = personAgeInYear(person, year);
       if(person==="B" && api.state.singlePerson) return {gross:0, at:0, ctx:{year, age}, tax:api.personTax({year, age}), pension:null};
-      if(r.pension.active){
+      if(r['pension'+person].active){
         const pension = estimatedPublicPension(person, year, cppShare);
         // CPP and OAS are taxable but don't qualify for the pension credit.
         const ctx = {year, age, other:pension.total, oas:pension.oas};
@@ -161,6 +162,7 @@ function computeSalaryChain(){
       grossA:a.gross, atA:a.at, grossB:b.gross, atB:b.at, totalAfterTax:a.at+b.at,
       growthPct:r.growth.pct, growthManual:r.growth.manual,
       pensionActive:!!r.pension.active, pensionManual:!!r.pension.manual,
+      pensionActiveA:!!r.pensionA.active, pensionActiveB:!api.state.singlePerson && !!r.pensionB.active,
       salaryGrossA:r.salaryGrossA, salaryGrossB:r.salaryGrossB,
       // Tax detail per person: the context for withdrawals/refunds, and the breakdown.
       taxCtxA:a.ctx, taxCtxB:b.ctx, taxA:a.tax, taxB:b.tax,
