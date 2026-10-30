@@ -532,15 +532,25 @@ test('home-improvement goals default to a savings plan and distinguish metric ta
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(goal).toContainText('Savings plan: Not reached');
   await expect(goal).toContainText('Planned savings at target date: $0');
-  // Explicit net-worth tracking remains available, with funding caveats on the card.
+  // Issue #83: a household metric must explain how to assess goal savings instead.
   await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
   await dialog.getByLabel('What are you aiming for?').selectOption('customNetWorth');
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(goal).toContainText('Funding not assessed');
   await expect(goal.locator('progress')).toHaveCount(0);
-  await expect(goal).toContainText('does not show money earmarked or available for this goal');
+  await expect(goal).toContainText('surplus and investments are not automatically allocated to this goal');
+  await expect(goal).toContainText('compare planned savings with this $18,000 target by December 2028');
+  await expect(goal).toContainText('choose "A separate planned savings schedule" under "How to measure progress"');
+  for(const label of ['Already saved','Frequency','Start year','Start month','Fixed amount per payment','Divide remaining target across the schedule']){
+    await expect(goal).toContainText(`"${label}"`);
+  }
+  await expect(goal).toContainText('Affordability is not checked');
+  await expect(goal).toContainText('schedule does not move money in your projection');
+  await expect(goal).not.toContainText('Household net worth');
+  await expect(goal).not.toContainText('Projected metric at target date');
   await page.reload();await nav(page,'goals');
-  await expect(goal).toContainText('Household net worth');
+  await expect(goal).toContainText('Savings toward this goal at target date: Not assessed');
+  await expect(goal).not.toContainText('Household net worth');
   await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
   await expect(dialog.getByLabel('How to measure progress')).toHaveValue('automatic');
   // Existing net-worth goals can be reassessed using only their savings schedule.
@@ -553,6 +563,17 @@ test('home-improvement goals default to a savings plan and distinguish metric ta
   await expect(goal.locator('progress')).toHaveAttribute('value','0');
   await page.reload();await nav(page,'goals');
   await expect(goal).toContainText('Planned savings at target date: $0');
+  // Follow the guidance to calculate, save, and persist the required contributions.
+  await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
+  await expect(dialog.getByLabel('Already saved')).toBeVisible();
+  await dialog.getByLabel('Contribution amount',{exact:true}).selectOption('auto');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(goal).toContainText('Planned savings at target date: $18,000');
+  await expect(goal).toContainText('Savings plan: On track');
+  await expect(goal).toContainText('$500');
+  await expect(goal).toContainText('36 payments');
+  await page.reload();await nav(page,'goals');
+  await expect(goal).toContainText('Planned savings at target date: $18,000');
 });
 
 
