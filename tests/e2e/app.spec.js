@@ -376,6 +376,39 @@ test('recurring extras and payday schedules change the intended unlocked months'
   await page.reload();await expect(page.locator('.extra')).toHaveCount(4);
 });
 
+test('Year summary counts all visible open months separately from months ready to close (#64)',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-10-30T12:00:00'));
+  await setupPlan(page);
+  await page.locator('#close-0').click();
+  await page.getByRole('dialog').getByRole('button',{name:'Skip',exact:true}).click();
+  await page.reload();
+  await expect(page.locator('#year-open-summary')).toContainText('11 months are still open in 2026.');
+  await expect(page.locator('#closeout-reminder')).toContainText('8 past months can be closed now. Close February 2026');
+  await expect(page.locator('.month-card')).toHaveCount(11);
+  await expect(page.locator('#closed-note')).toContainText('1 closed month is hidden');
+  await expect(page.locator('#month-0')).toHaveCount(0);
+  await expect(page.locator('#close-9')).toHaveAttribute('aria-disabled','true');
+  await expect(page.locator('#close-11')).toHaveAttribute('aria-disabled','true');
+  await page.locator('#closeout-first').click();
+  await expect(page.getByRole('dialog')).toContainText('Close February 2026');
+  await page.getByRole('dialog').getByRole('button',{name:'Skip',exact:true}).click();
+  await expect(page.locator('#year-open-summary')).toContainText('10 months are still open in 2026.');
+  await expect(page.locator('#closeout-reminder')).toContainText('7 past months can be closed now');
+  await page.getByLabel('Plan year',{exact:true}).selectOption('2027');
+  await expect(page.locator('#year-open-summary')).toContainText('12 months are still open in 2027. Months can be closed after they end.');
+  await expect(page.locator('#closeout-first')).toHaveCount(0);
+  await expect(page.locator('.month-card')).toHaveCount(12);
+  // Earlier years' pending months must not supply this year's count or action.
+  await page.clock.setFixedTime(new Date('2027-03-15T12:00:00'));
+  await page.locator('[data-tab="year"]').click();
+  await expect(page.locator('#closeout-reminder')).toContainText('2 past months can be closed now. Close January 2027');
+  await page.locator('#closeout-first').click();
+  await expect(page.getByRole('dialog')).toContainText('Close January 2027');
+  await page.getByRole('dialog').getByRole('button',{name:'Skip',exact:true}).click();
+  await expect(page.locator('#year-open-summary')).toContainText('11 months are still open in 2027.');
+  await expect(page.locator('#closeout-reminder')).toContainText('1 past month can be closed now. Close February 2027');
+});
+
 test('closing an ended month saves a lesson, hides the month, and blocks current and future months',async({page})=>{
   await page.clock.setFixedTime(new Date('2026-03-15T12:00:00'));
   await setupPlan(page);
@@ -383,7 +416,7 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   const income=await annualTotals.nth(0).textContent(),expenses=await annualTotals.nth(1).textContent();
   const totalsBefore=await annualTotals.allTextContents();
   const februaryBefore=await page.locator('#month-1').textContent(),decemberBefore=await page.locator('#month-11').textContent();
-  await expect(page.locator('#closeout-reminder')).toContainText('2 past months are still open');
+  await expect(page.locator('#closeout-reminder')).toContainText('2 past months can be closed now');
   await expect(page.locator('#close-3')).toHaveAttribute('aria-disabled','true');
   await page.locator('#close-3').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
   await page.locator('#close-2').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
@@ -405,7 +438,7 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await expect(projection.locator('td').nth(0)).toHaveText(income);
   await expect(projection.locator('td').nth(1)).toHaveText(expenses);
   await nav(page,'year');
-  await expect(page.locator('#closeout-reminder')).toContainText('1 past month is still open');
+  await expect(page.locator('#closeout-reminder')).toContainText('1 past month can be closed now');
   await page.locator('#closeout-first').click();await dialog.getByRole('button',{name:'Skip'}).click();
   await expect(page.locator('#month-1')).toHaveCount(0);await expect(page.locator('#closeout-reminder')).toHaveCount(0);
   await expect(page.locator('#month-2')).toBeVisible();
