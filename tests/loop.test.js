@@ -72,17 +72,18 @@ describe('auto-development loop', () => {
     await expect(new Loop(options(['round', '--only', 'missing']), {run}).execute()).rejects.toThrow('Unknown persona');
     expect(run).not.toHaveBeenCalled();
   });
-  it('caps parallel workers at three and drains workers when one fails', async () => {
+  it('caps parallel workers at three and continues past one failed tester', async () => {
     let active = 0, peak = 0, completed = 0;
-    await expect(pool([0, 1, 2, 3, 4, 5], 3, async id => {
+    await pool([0, 1, 2, 3, 4, 5], 3, async id => {
       active++; peak = Math.max(peak, active);
       await new Promise(r => setTimeout(r, 2));
       active--; completed++;
       if (id === 0) throw new Error('tester failed');
-    })).rejects.toThrow('tester failed');
+    });
     expect(peak).toBe(3);
     expect(active).toBe(0);
     expect(completed).toBe(6);
+    await expect(pool([0, 1], 2, async () => {throw new Error('all failed');})).rejects.toThrow('all failed');
   });
   it('selects oldest eligible issues, skipping PRs and triaged items', () => {
     const human = issue(1); human.labels.push({name: 'needs-human'});

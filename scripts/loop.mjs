@@ -59,12 +59,14 @@ export function runCommand(command, args, {cwd = ROOT, input, timeout = 30 * 60_
 
 export async function pool(items, limit, task) {
   let cursor = 0;
+  const errors = [];
   // Drain every worker before surfacing an error: no tester may still write during filing.
-  const results = await Promise.allSettled(Array.from({length: Math.min(limit, items.length)}, async () => {
-    while (cursor < items.length) {const index = cursor++; await task(items[index]);}
+  await Promise.allSettled(Array.from({length: Math.min(limit, items.length)}, async () => {
+    while (cursor < items.length) {const index = cursor++; try {await task(items[index]);} catch (error) {errors.push(error);}}
   }));
-  const failure = results.find(r => r.status === 'rejected');
-  if (failure) throw failure.reason;
+  // One bad tester session should not cancel the round; fail only when nothing succeeded.
+  for (const error of errors) console.error('Skipped: ' + error.message);
+  if (errors.length && errors.length === items.length) throw errors[0];
 }
 
 export function selectIssues(issues, max) {
@@ -138,8 +140,8 @@ export class Loop {
       const log = await fs.readFile(logFile, 'utf8');
       if (!log.startsWith(oldLog)) throw new Error(persona.id + ': tester overwrote earlier evidence');
       const records = log.slice(oldLog.length).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
-      const start = records.find(r => r.kind === 'start' && r.persona === persona.id);
-      if (!start || !records.some(r => r.kind === 'end' && r.runId === start.runId) || !records.some(r => r.kind === 'command' && r.runId === start.runId)) throw new Error(persona.id + ': no completed fresh tester session');
+      const completed = records.filter(r => r.kind === 'start' && r.persona === persona.id).some(start => records.some(r => r.kind === 'end' && r.runId === start.runId) && records.some(r => r.kind === 'command' && r.runId === start.runId));
+      if (!completed) throw new Error(persona.id + ': no completed fresh tester session');
       if ((await fs.stat(issuesFile, {bigint: true})).mtimeNs === oldModified) throw new Error(persona.id + ': stale issues.md');
       const report = await fs.readFile(issuesFile, 'utf8');
       if (!report.trim()) throw new Error(persona.id + ': empty issues.md');
