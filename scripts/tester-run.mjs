@@ -22,14 +22,14 @@ async function build() {
   });
 }
 
-export async function startTester(personaId, {acceptance = false, profileName = 'agent'} = {}) {
+export async function startTester(personaId, {acceptance = false, profileName = 'agent', skipBuild = false} = {}) {
   // Resolve all artifacts from this repository, regardless of the caller's cwd.
   if (path.resolve(process.cwd()) !== path.resolve(root)) throw new Error('Run from the project root.');
   const personas = JSON.parse(await fs.readFile(new URL('../testers/personas.json', import.meta.url), 'utf8'));
   const persona = personas.find(p => p.id === personaId);
   if (!persona) throw new Error('Unknown persona. Choose: ' + personas.map(p => p.id).join(', '));
   if (!/^[a-z0-9_-]+$/i.test(profileName)) throw new Error('Use a simple profile name.');
-  await build();
+  if (!skipBuild) await build();
   const directory = inside(path.join(root, 'testers'), personaId);
   await fs.mkdir(path.join(directory, 'screenshots'), {recursive: true});
   const runId = new Date().toISOString().replace(/[:.]/g, '-');
@@ -127,9 +127,11 @@ export async function startTester(personaId, {acceptance = false, profileName = 
 }
 
 async function main() {
-  const [id, ...args] = process.argv.slice(2);
-  if (!id || (args.length && (args.length !== 2 || args[0] !== '--profile'))) throw new Error('Usage: node scripts/tester-run.mjs <persona-id> [--profile <name>] (JSONL commands on stdin; EOF closes)');
-  const session = await startTester(id, {profileName: args[1] || 'agent'});
+  const [id, ...rawArgs] = process.argv.slice(2);
+  const skipBuild = rawArgs.includes('--skip-build');
+  const args = rawArgs.filter(arg => arg !== '--skip-build');
+  if (!id || (args.length && (args.length !== 2 || args[0] !== '--profile'))) throw new Error('Usage: node scripts/tester-run.mjs <persona-id> [--profile <name>] [--skip-build] (JSONL commands on stdin; EOF closes)');
+  const session = await startTester(id, {profileName: args[1] || 'agent', skipBuild});
   console.log(JSON.stringify({ready: id, profile: session.profileName, commands: ['goto','click','fill','select','text','screenshot','errors','export','import','note','quit']}));
   try {
     for await (const line of readline.createInterface({input: process.stdin, crlfDelay: Infinity})) {

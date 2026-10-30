@@ -30,7 +30,7 @@ One command runs a full improvement round with no human input, per REQUIREMENTS.
 - Out: repo settings (Claude enables auto-merge + required CI check).
 
 ## Acceptance checklist
-- [ ] `node scripts/loop.mjs all --dry-run` prints the full plan for one round
+- [x] `node scripts/loop.mjs all --dry-run` prints the full plan for one round
 - [ ] `node scripts/loop.mjs round --only <one-persona>` works for real
 - [ ] `npm test`, `npm run test:e2e`, `npm run build` pass
 
@@ -40,4 +40,17 @@ One command runs a full improvement round with no human input, per REQUIREMENTS.
 
 ## Codex report
 
+- Implemented `scripts/loop.mjs`: round/file/fix/all, persona filtering, 3 tester workers, fix/round limits, project-only Codex sandboxes.
+- Tester rounds build once; `tester-run.mjs --skip-build` reuses dist and preserves normal standalone behavior.
+- Require fresh completed browser logs and rewritten valid issue reports before filing; filing adds scoped selection and JSON summaries.
+- Fixes use isolated retained worktrees, noreply commits, regression tests, all three validation commands, and one repair retry.
+- Added conservative small-idea triage, idea-backlog/needs-human labels and comments, PR resumption, and confirmed-merge polling.
+- Existing open tester issues are processed even when a round files zero new issues; merged changes trigger retesting within the round limit.
+- Real rounds append dated outcomes to `testers/ROUNDS.md`; dry runs launch no processes and write no logs.
+- Added `docs/AUTO-DEV.md` with prerequisites, options, retained evidence, and recovery behavior.
+- PASS: `npm.cmd test` (56 tests, including 20 orchestration tests); full all dry-run; scoped round/fix dry-runs; scoped issue-filer dry-run.
+- Not run: live Codex/gh steps, e2e, or build; issues #4/#5 and repository settings untouched. No git commands executed or files deleted.
+
 ## Opus review
+
+Pass. e2e 20/20 + build verified by Opus. Live run next.
