@@ -165,3 +165,45 @@ test('lessons and closed months round-trip through JSON export and import',async
   await nav(page,'year');await expect(page.locator('#month-0')).toHaveCount(0);await expect(page.locator('#month-1')).toBeVisible();
   await nav(page,'more');await page.getByRole('button',{name:'Lessons learned'}).click();await expect(page.locator('.lessons')).toContainText('Keep a buffer.');
 });
+
+test('home-improvement goals default to a savings plan and distinguish metric targets from funding',async({page})=>{
+  await setupPlan(page);
+  await nav(page,'goals');
+  await page.getByRole('button',{name:'Add goal',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByLabel('Goal name or description').fill('Accessible home improvements');
+  await expect(dialog.getByLabel('What are you aiming for?')).toHaveValue('customSavings');
+  await expect(dialog.getByLabel('How to measure progress')).toHaveValue('dedicated');
+  await expect(dialog.getByLabel('Already saved')).toBeVisible();
+  await dialog.getByLabel('Target amount (CAD, %, months, or years)').fill('18000');
+  await dialog.getByLabel('Target year',{exact:true}).selectOption('2028');
+  await dialog.getByLabel('Target month',{exact:true}).selectOption('11');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  const goal=page.locator('.goal-grid .card');
+  await expect(goal).toContainText('Dedicated goal savings');
+  await expect(goal).toContainText('Savings plan:');
+  await expect(goal).toContainText('money is not moved or confirmed saved');
+  await expect(goal).not.toContainText('Achieved');
+  await expect(goal).not.toContainText('Household net worth');
+  await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
+  await dialog.getByLabel('What are you aiming for?').selectOption('netWorthMilestone');
+  await expect(dialog.getByLabel('How to measure progress')).toHaveValue('automatic');
+  await dialog.getByLabel('What are you aiming for?').selectOption('renovationFund');
+  await expect(dialog.getByLabel('How to measure progress')).toHaveValue('dedicated');
+  // A large household balance cannot fund a savings plan with no contributions.
+  await dialog.getByLabel('Contribution amount',{exact:true}).selectOption('fixed');
+  await dialog.getByLabel('Fixed amount per payment').fill('0');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(goal).toContainText('Savings plan: Not reached');
+  await expect(goal).toContainText('Planned savings at target date: $0');
+  // Explicit net-worth tracking remains available, with funding caveats on the card.
+  await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
+  await dialog.getByLabel('What are you aiming for?').selectOption('customNetWorth');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await expect(goal).toContainText('Metric: target met');
+  await expect(goal).toContainText('does not show money earmarked or available for this goal');
+  await page.reload();await nav(page,'goals');
+  await expect(goal).toContainText('Household net worth');
+  await goal.getByRole('button',{name:'Edit goal',exact:true}).click();
+  await expect(dialog.getByLabel('How to measure progress')).toHaveValue('automatic');
+});
