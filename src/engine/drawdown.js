@@ -72,15 +72,18 @@ function getWindowPlan(win, claimStart=win.start){
 function drawdownMetrics(series, salaryChain, evalYear){
   let idx = series.findIndex(ys=>ys.year===evalYear);
   if(idx<0) idx = series.length-1;
-  let tax = 0;
-  for(let i=0;i<=idx;i++) series[i].months.forEach(m=>{ tax += Number(m.autoWithdrawalTax)||0; });
+  let tax = 0, uncovered = 0;
+  for(let i=0;i<=idx;i++) series[i].months.forEach(m=>{
+    tax += Number(m.autoWithdrawalTax)||0;
+    uncovered += Number(m.autoWithdrawalUncovered)||0;
+  });
   const end = series[idx].months[11];
   const sal = salaryChain[idx] || {};
   const N = DRAW_TERMINAL_SPREAD_YEARS;
   const term = (rrsp, ctx)=> rrsp>0 ? N*api.withdrawalTaxIncrement(ctx || {}, 0, rrsp/N) : 0;
   const termTax = term(end.rrspBalA, sal.taxCtxA) + (api.state.singlePerson ? 0 : term(end.rrspBalB, sal.taxCtxB));
   const afterTaxNetWorth = end.cashA + end.cashB + end.tfsaBalA + end.tfsaBalB + end.rrspBalA + end.rrspBalB - termTax;
-  return {tax, termTax, lifetimeTax:tax+termTax, afterTaxNetWorth, evalYear:series[idx].year};
+  return {tax, termTax, lifetimeTax:tax+termTax, afterTaxNetWorth, uncovered, evalYear:series[idx].year};
 }
 
 function resolveDrawdown(){
@@ -121,7 +124,8 @@ function resolveDrawdown(){
         apply(mk({strategy:"ceiling", ceiling:c}));
         const m = measure();
         candidates.push({ceiling:c, lifetimeTax:m.lifetimeTax, afterTaxNetWorth:m.afterTaxNetWorth});
-        if(m.afterTaxNetWorth > chosenMetrics.afterTaxNetWorth + 1){
+        // Empty portfolios still differ in how much spending they leave unfunded.
+        if(m.afterTaxNetWorth - m.uncovered > chosenMetrics.afterTaxNetWorth - chosenMetrics.uncovered + 1){
           chosen = mk({strategy:"ceiling", ceiling:c});
           chosenMetrics = m;
         }
