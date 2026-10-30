@@ -1,0 +1,15 @@
+# Current session notes
+
+Fresh file-based browser batches completed on 2026-10-30 with the persistent `profile/agent` plan. Every batch closed cleanly. Earlier logs, profiles, screenshots, and backups were preserved. January 2026 was already closed and was not closed again.
+
+Reviewed setup: Casey, 29, Saskatchewan, no dependants, $48,000 annual employee salary, 2026 start, and opening balances of $6,000 bank, $3,500 TFSA, and $8,000 RRSP. Existing assumptions remain 2.5% pay growth, 2.5% inflation, 7% return, stop-work at 65 (2062), and CPP/OAS starting at 65; these are planning assumptions. No unsupported income was represented as salary. Setup review disclosed employee payroll estimation and recommended after-tax treatment for any freelance income.
+
+Reviewed Year, Salary, Budget, Invest, More, Goals, Projection & analysis, and Lessons learned. Captured fresh screenshots for each. Existing seasonal take-home schedule is seven months at $5,472 ($38,304 total) and five at $0. Monthly cash warning lists Jan, Feb, Mar, Nov, Dec and identifies $0 projected bank in March; annual surplus is $6,504 before investments. This addresses the brief's annual-average concern, though investment withdrawal and cash allocation assumptions affect the projection. Salary remains annual employee pay; monthly timing must be overridden in Year.
+
+Budget is $2,400 living plus $250 line-of-credit payment = $2,650/month or $31,800/year. The aggregate living amount was retained because the brief gives no detailed category breakdown. The $250 payment expense does not establish principal or interest amortization; Year explicitly says net worth excludes debt. The $11,000 line of credit is not deducted in the displayed net worth.
+
+Goal remains $9,000 by December 2027. The app shows 23 planned payments of $391; $9,000 / 23 = $391.30, so the rounded display is consistent. Goal copy says savings are assumed and money is not confirmed saved. Existing January lesson says winter months need cash and was visible after restart. Did not invent CRA contribution room; existing room entries cannot be validated using the brief. Tax outputs were not independently checked and are treated only as estimates/hypotheses.
+
+Exported and kept `2026-10-30T19-45-03-881Z-backup.json`. Import preview named Casey, starting year 2026, 2 regular expenses and 1 goal. Confirmed Import this plan, then restarted a fresh harness batch and verified the Year warning, budget values, goal, January 2026 lesson, and setup balances remained. Initial attempts to open the file chooser with a raw click did not select a file and the confirmation click timed out; these command errors are in the run log. Retrying with the harness `import` operation completed preview and confirmation. Subsequent `errors` inspections were empty; no browser errors found.
+
+No new closeout or lesson entry was made because January already had a saved closeout/lesson. Offline behavior, actual tax accuracy, and debt amortization remain untested. No app fixes, file-issues, git, gh, or installations were run.
