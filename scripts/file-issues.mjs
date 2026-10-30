@@ -34,10 +34,14 @@ export function dedupeIssues(issues) {
 const gh = args => execFileSync('gh', args, {cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
 async function main() {
   const args = process.argv.slice(2);
-  if (args.some(arg => !['--file', '--dry-run'].includes(arg)) || args.includes('--file') && args.includes('--dry-run')) throw new Error('Usage: node scripts/file-issues.mjs [--dry-run | --file]');
+  const onlyIndex = args.indexOf('--only');
+  const only = onlyIndex < 0 ? null : args.splice(onlyIndex, 2)[1];
+  if ((onlyIndex >= 0 && !only) || args.some(arg => !['--file', '--dry-run', '--summary-json'].includes(arg)) || args.includes('--file') && args.includes('--dry-run')) throw new Error('Usage: node scripts/file-issues.mjs [--dry-run | --file] [--only <persona>] [--summary-json]');
   const personas = JSON.parse(await fs.readFile(path.join(root, 'testers/personas.json'), 'utf8'));
+  if (only && !personas.some(p => p.id === only)) throw new Error('Unknown persona: ' + only);
   const reports = [];
   for (const persona of personas) {
+    if (only && persona.id !== only) continue;
     try {reports.push(...parseIssues(await fs.readFile(path.join(root, 'testers', persona.id, 'issues.md'), 'utf8'), persona.id));}
     catch (error) {if (error.code !== 'ENOENT') throw error;}
   }
@@ -52,6 +56,7 @@ async function main() {
       if (!labels.includes(label)) gh(['label', 'create', label, '--color', '7057ff', '--description', 'Persona testing']);
     }
   }
+  const filed = [];
   for (const group of groups) {
     const marker = `<!-- persona-tester:${group.fingerprint} -->`;
     const duplicate = existing.find(issue => issue.body?.includes(marker));
@@ -59,8 +64,15 @@ async function main() {
     const body = `${marker}\n\n` + group.reports.map(r => `### Persona: ${r.persona}\n${r.body}`).join('\n\n');
     console.log(JSON.stringify({title: group.title, fingerprint: group.fingerprint, labels, status: duplicate ? 'already filed' : 'ready', body}));
     if (args.includes('--file') && !duplicate) {
-      console.log(gh(['issue', 'create', '--title', `[tester] ${group.title}`, '--body', body, ...labels.flatMap(label => ['--label', label])]).trim());
+      const directory = path.join(root, '.cache', 'issue-bodies');
+      await fs.mkdir(directory, {recursive: true});
+      const bodyFile = path.join(directory, group.fingerprint + '.md');
+      await fs.writeFile(bodyFile, body);
+      const url = gh(['issue', 'create', '--title', `[tester] ${group.title}`, '--body-file', bodyFile, ...labels.flatMap(label => ['--label', label])]).trim();
+      filed.push(url);
+      console.log(url);
     }
   }
+  if (args.includes('--summary-json')) console.log('LOOP_SUMMARY ' + JSON.stringify({filed}));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch(error => {console.error(error.message); process.exitCode = 1;});
