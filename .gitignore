@@ -2,6 +2,8 @@ reference/
 node_modules/
 dist/
 testers/*/screenshots/
+testers/*/profile/
+testers/*/downloads/
 *.keystore
 *base64*.txt
 google_client_id.txt
@@ -9,3 +11,4 @@ google_client_id.txt
 .cache/
 test-results/
 playwright-report/
+*.log

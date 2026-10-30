@@ -28,9 +28,9 @@ Project folder: C:\Users\Kido\03-ventures\finance-plan-beta (stay inside it)
 - Out: fixing the issues found (task 004).
 
 ## Acceptance checklist
-- [ ] One persona run end-to-end produces log, screenshots, issues.md
-- [ ] file-issues dry-run lists deduped issues
-- [ ] `npm test`, `npm run test:e2e`, `npm run build` still pass
+- [x] One persona run end-to-end produces log, screenshots, issues.md
+- [x] file-issues dry-run lists deduped issues
+- [x] `npm test`, `npm run test:e2e`, `npm run build` still pass
 
 ## Rules
 - Ask before: deleting files, working outside the project folder, paid/credit tools. No git commands (Claude handles git).
@@ -38,4 +38,18 @@ Project folder: C:\Users\Kido\03-ventures\finance-plan-beta (stay inside it)
 
 ## Codex report
 
+- Added 10 fictional Canadian personas and individual briefs/issues files; nine remain ready for separate runs.
+- Added persistent Chromium phone harness with JSONL commands, screenshots, text/errors, and backup export/import.
+- Added agent instructions and a reproducible student acceptance journey; profiles and downloads stay ignored.
+- Student completed setup, every tab, goal, January closeout/lesson, reload and export/import; zero browser errors.
+- Evidence and reopen command: `testers/on-student/run-summary.md`; dated screenshots, logs and backup retained locally.
+- Logged two findings: debt principal tracking (idea), and closed January omitted from annual totals (wrong-number).
+- Annual expenses changed from $17,400 to $15,950 after closing; left unfixed per task scope.
+- Issue filer dry-run: 2 reports -> 2 unique issues; cross-persona dedupe tests also pass.
+- `--file` supports GitHub fingerprint checks and tester/type/persona labels; no issues posted during this run.
+- Validation: 36 unit tests, 20 phone/desktop e2e tests, production build, and CLI profile reopening passed.
+- Used `npm.cmd` because PowerShell blocks `npm.ps1`; no installations required. No git commands used.
+
 ## Opus review
+
+Pass. Harness + 10 personas (all provinces incl. Atlantic). First run already caught a real bug (closed month dropped from annual totals).
