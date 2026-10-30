@@ -30,3 +30,30 @@ PRs merged: 3 https://github.com/kidojankugaharan/finance-plan-beta/pull/27 http
 Needs-human: none
 Idea-backlog: 18, 19
 Result: completed
+
+## 2026-10-30T15:47:41.424Z — all, round 1
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 3 https://github.com/kidojankugaharan/finance-plan-beta/issues/31 https://github.com/kidojankugaharan/finance-plan-beta/issues/32 https://github.com/kidojankugaharan/finance-plan-beta/issues/33
+PRs merged: 1 https://github.com/kidojankugaharan/finance-plan-beta/pull/34
+Needs-human: 8, 14
+Idea-backlog: 24
+Skipped personas: none
+Result: completed
+
+## 2026-10-30T16:20:04.570Z — all, round 2
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 5 https://github.com/kidojankugaharan/finance-plan-beta/issues/35 https://github.com/kidojankugaharan/finance-plan-beta/issues/36 https://github.com/kidojankugaharan/finance-plan-beta/issues/37 https://github.com/kidojankugaharan/finance-plan-beta/issues/38 https://github.com/kidojankugaharan/finance-plan-beta/issues/39
+PRs merged: 4 https://github.com/kidojankugaharan/finance-plan-beta/pull/40 https://github.com/kidojankugaharan/finance-plan-beta/pull/41 https://github.com/kidojankugaharan/finance-plan-beta/pull/42 https://github.com/kidojankugaharan/finance-plan-beta/pull/43
+Needs-human: none
+Idea-backlog: none
+Skipped personas: none
+Result: completed
+
+## 2026-10-30T17:06:12.623Z — all, round 3
+Personas: on-student, qc-self-employed-family, ab-trades-couple, bc-single-parent, ns-near-retirement, nb-pensioner, mb-newcomer-couple, sk-seasonal-worker, pe-caregiver, nl-high-income-couple
+Issues filed: 4 https://github.com/kidojankugaharan/finance-plan-beta/issues/44 https://github.com/kidojankugaharan/finance-plan-beta/issues/45 https://github.com/kidojankugaharan/finance-plan-beta/issues/46 https://github.com/kidojankugaharan/finance-plan-beta/issues/47
+PRs merged: 3 https://github.com/kidojankugaharan/finance-plan-beta/pull/48 https://github.com/kidojankugaharan/finance-plan-beta/pull/49 https://github.com/kidojankugaharan/finance-plan-beta/pull/50
+Needs-human: 37
+Idea-backlog: none
+Skipped personas: none
+Result: completed
