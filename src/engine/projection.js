@@ -4,8 +4,7 @@ function computeAnnualAggregates(){
   const series = computeMonthlySeries();
   return series.map((y)=>{
     const t = y.months.reduce((acc,m)=>{
-      // Closed months suppress projected cash movements, but their recorded
-      // income, spending, extras and savings still belong in full-year totals.
+      // Closed months retain their cash flows in projections and full-year totals.
       acc.earning+=m.displayEarning; acc.expense+=m.displayExpense; acc.extraNet+=m.displayExtraNet;
       acc.netCashFlow+=m.displayNetCashFlow; acc.tfsaContrib+=m.tfsaContrib; acc.rrspContrib+=m.rrspContrib;
       acc.growth+=m.investGrowthIncome;
@@ -159,7 +158,6 @@ function computeMonthlySeriesCore(policies){
     const drawCtxA = withYearDeductions(salaryChain[yIdx].taxCtxA, y.year, "A", rrspTaxMap);
     const drawCtxB = single ? salaryChain[yIdx].taxCtxB : withYearDeductions(salaryChain[yIdx].taxCtxB, y.year, "B", rrspTaxMap);
     const monthNetTotals = y.months.map((mm,k)=>{
-      if(mm.locked) return 0;
       const exp = (mm.expense!==null && mm.expense!=="" && mm.expense!==undefined) ? Number(mm.expense) : api.budgetTotalForMonth(y.year,k);
       const earn = (mm.earning!==null && mm.earning!=="" && mm.earning!==undefined) ? Number(mm.earning) : annualEarnings/12;
       let ex = 0;
@@ -195,14 +193,9 @@ function computeMonthlySeriesCore(policies){
       const rrspContrib = rrspA+rrspB;
 
       const isCompleted = !!m.locked;
-      const effectiveEarning = isCompleted ? 0 : earning;
-      const effectiveExpense = isCompleted ? 0 : expense;
-      const effectiveExtraA = isCompleted ? 0 : extraA;
-      const effectiveExtraB = isCompleted ? 0 : extraB;
-      const effectiveExtraNet = effectiveExtraA + effectiveExtraB;
       const investmentOutflow = tfsaContrib + rrspContrib;
       const displayNetCashFlow = earning + extraNetRaw - expense - investmentOutflow;
-      const netCashFlow = isCompleted ? 0 : displayNetCashFlow;
+      const netCashFlow = displayNetCashFlow;
 
       const earningA = earning*earnShareA, earningB = earning-earningA;
       const expenseShare = computeOwnerExpenseShare(y.year,mIdx);
@@ -211,25 +204,26 @@ function computeMonthlySeriesCore(policies){
       const contribB = tfsaB+rrspB;
       const netA = earningA+extraA-expenseA-contribA;
       const netB = earningB+extraB-expenseB-contribB;
-      if(!isCompleted){ cashA += netA; cashB += netB; }
+      // Closing a month hides its card; its recorded activity still moves balances.
+      cashA += netA; cashB += netB;
 
       // Contributions are assumed invested immediately for both registered accounts.
       tfsaBalA += tfsaA; tfsaBalB += tfsaB;
       rrspBalA += rrspA; rrspBalB += rrspB;
 
       // Automatic cash-deficit protection. If projected combined bank cash falls
-      // below $0 in an unlocked/projected month, withdraw only enough to bring
+      // below $0 in a month, withdraw only enough to bring
       // the combined bank balance back to $0. Withdrawal priority is:
       // 1) TFSAs, smallest current account first; 2) RRSPs, smallest current
       // account first. If the full portfolio cannot cover the deficit, the
       // uncovered amount remains negative and is surfaced as a critical flag.
       const cashBeforeAutoWithdrawal = cashA + cashB;
-      let bankDeficitBeforeWithdrawal = (!isCompleted && cashBeforeAutoWithdrawal < -0.005)
+      let bankDeficitBeforeWithdrawal = (cashBeforeAutoWithdrawal < -0.005)
         ? Math.abs(cashBeforeAutoWithdrawal) : 0;
       // Lump-sum plan: in the chosen month, cover the lowest bank balance
       // projected between now and December in a single withdrawal.
       let lumpSumDraw = false;
-      if(!isCompleted && drawPlan.mode==="lump" && mIdx===drawPlan.month){
+      if(drawPlan.mode==="lump" && mIdx===drawPlan.month){
         let run = cashBeforeAutoWithdrawal, minPath = run;
         for(let k=mIdx+1; k<12; k++){ run += monthNetTotals[k]; if(run < minPath) minPath = run; }
         const lumpNeed = Math.max(0, -minPath);
@@ -325,7 +319,7 @@ function computeMonthlySeriesCore(policies){
       // RRIF minimum: whatever this year's shortfall draws didn't already take
       // is paid out in December, taxed, into the owner's bank cash.
       let rrifMinimumDraw = 0;
-      if(mIdx===11 && !isCompleted){
+      if(mIdx===11){
         [["A", rrifMinA], ["B", rrifMinB]].forEach(([person, minimum])=>{
           const ytd = person==="A" ? rrspGrossYtdA : rrspGrossYtdB;
           const balance = Math.max(0, person==="A" ? rrspBalA : rrspBalB);
@@ -368,8 +362,8 @@ function computeMonthlySeriesCore(policies){
       const netWorth = cashA + cashB + tfsaBal + rrspBal;
 
       months.push({
-        expense:effectiveExpense, earning:effectiveEarning,
-        extraA:effectiveExtraA, extraB:effectiveExtraB, extraNet:effectiveExtraNet,
+        expense, earning,
+        extraA, extraB, extraNet:extraNetRaw,
         displayExpense:expense, displayEarning:earning,
         displayExtraA:extraA, displayExtraB:extraB, displayExtraNet:extraNetRaw, displayNetCashFlow,
         entries, netCashFlow, isCompleted, rrspRefundA, rrspRefundB,

@@ -308,6 +308,8 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await setupPlan(page);
   const annualTotals=page.locator('main > .metrics > .metric strong');
   const income=await annualTotals.nth(0).textContent(),expenses=await annualTotals.nth(1).textContent();
+  const totalsBefore=await annualTotals.allTextContents();
+  const februaryBefore=await page.locator('#month-1').textContent(),decemberBefore=await page.locator('#month-11').textContent();
   await expect(page.locator('#closeout-reminder')).toContainText('2 past months are still open');
   await expect(page.locator('#close-3')).toHaveAttribute('aria-disabled','true');
   await page.locator('#close-3').click({force:true});await expect(page.locator('#notice')).toContainText('You can close this month after it ends.');
@@ -320,6 +322,8 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await expect(page.locator('#month-0')).toBeVisible();
   await page.locator('#close-0').click();await dialog.getByLabel(/Notes \/ lessons learned/).fill('Groceries ran over; budget $50 more.');await dialog.getByRole('button',{name:'Save',exact:true}).click();
   await expect(page.locator('#month-0')).toHaveCount(0);await expect(page.locator('#closed-note')).toContainText('1 closed month is hidden');
+  await expect(annualTotals).toHaveText(totalsBefore);
+  await expect(page.locator('#month-1')).toHaveText(februaryBefore);await expect(page.locator('#month-11')).toHaveText(decemberBefore);
   await expect(annualTotals.nth(0)).toHaveText(income);await expect(annualTotals.nth(1)).toHaveText(expenses);
   await expect(page.locator('#closed-note')).toContainText('Their data still counts in totals');
   await nav(page,'analysis');
@@ -333,6 +337,7 @@ test('closing an ended month saves a lesson, hides the month, and blocks current
   await expect(page.locator('#month-1')).toHaveCount(0);await expect(page.locator('#closeout-reminder')).toHaveCount(0);
   await expect(page.locator('#month-2')).toBeVisible();
   await page.reload();await expect(page.locator('#month-0')).toHaveCount(0);
+  await expect(annualTotals).toHaveText(totalsBefore);await expect(page.locator('#month-11')).toHaveText(decemberBefore);
   await expect(annualTotals.nth(0)).toHaveText(income);await expect(annualTotals.nth(1)).toHaveText(expenses);
   await nav(page,'more');await page.getByRole('button',{name:'Lessons learned'}).click();
   await expect(page.getByRole('heading',{name:'Lessons learned',level:1})).toBeVisible();
