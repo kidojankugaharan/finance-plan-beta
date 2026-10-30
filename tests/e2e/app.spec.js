@@ -25,7 +25,7 @@ async function setupPlan(page,{second=false}={}) {
   await page.getByRole('button',{name:'Continue',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Review',exact:true,level:1})).toBeVisible();
   await page.getByRole('button',{name:'Open my plan'}).click();
-  await expect(page.getByRole('heading',{name:'Your year, in focus.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Year'})).toBeVisible();
 }
 async function nav(page,tab) {
   if(['goals','analysis'].includes(tab)){
@@ -57,11 +57,11 @@ test('More Explore buttons open goals and projection on phone',async({page})=>{
 test('fresh household completes setup, visits every tab, persists, and fits the viewport',async({page},info)=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   await setupPlan(page,{second:true});
-  for(const [tab,title] of [['salary','Salary'],['budget','Budget'],['invest','Invest'],['goals','Goals'],['analysis','Projection & analysis'],['more','More'],['year','Your year, in focus.']]){
+  for(const [tab,title] of [['salary','Salary'],['budget','Budget'],['invest','Invest'],['goals','Goals'],['analysis','Projection & analysis'],['more','More'],['year','Year']]){
     await nav(page,tab);await expect(page.getByRole('heading',{name:title,exact:true,level:1})).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
   }
-  await page.reload();await expect(page.getByRole('heading',{name:'Your year, in focus.'})).toBeVisible();
+  await page.reload();await expect(page.getByRole('heading',{name:'Year'})).toBeVisible();
   await expect(page.locator('main')).toContainText('Taylor & Morgan');
   await page.screenshot({path:info.outputPath('year.png'),fullPage:true});
   expect(errors).toEqual([]);
@@ -76,19 +76,22 @@ test('freelance income discloses employee approximation in setup, salary, editor
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await nav(page,'salary');
   const notice=page.locator('main .income-notice');
+  await page.getByLabel("About Employee payroll",{exact:true}).click();
   await expect(notice).toBeVisible();
   await expect(notice).toContainText('Employee payroll approximation.');
   await expect(notice).toContainText('Freelance and self-employment tax treatment is not modelled.');
   await expect(notice).toContainText('inaccurate take-home income and projections');
   const disclosure=await notice.textContent();
+  await page.getByLabel('About Employee payroll',{exact:true}).click();
   await page.getByRole('button',{name:'Edit this year'}).click();
   await expect(dialog.locator('.income-notice')).toHaveText(disclosure);
   await dialog.getByLabel('Taylor · annual employee salary').fill('72000');
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(page.locator('main')).toContainText('Employee CPP/QPP · EI · QPIP (estimated)');
-  await expect(page.locator('main > .metrics')).toContainText('Employee payroll / pension estimate');
+  await expect(page.locator('.salary-detail-controls > .metrics')).toContainText('Employee payroll / pension estimate');
   await page.reload();
   await nav(page,'salary');
+  await page.getByLabel("About Employee payroll",{exact:true}).click();
   await expect(notice).toBeVisible();
   await nav(page,'more');
   await page.getByText('What the numbers assume',{exact:true}).click();
@@ -115,7 +118,7 @@ test('Quebec freelance cash flow stays separate from employee salary and payroll
   const freelanceBreakdown=page.locator('.person-grid section').first();
   await expect(freelanceBreakdown.getByText('Employee gross / pension income',{exact:true}).locator('+ dd')).toHaveText('$0');
   await expect(freelanceBreakdown.getByText(/Employee CPP/).locator('+ dd')).toHaveText('$0');
-  const payrollMetrics=await page.locator('main > .metrics').textContent();
+  const payrollMetrics=await page.locator('main > .metrics, .salary-detail-controls > .metrics').textContent();
   await nav(page,'year');
   const income=()=>page.locator('main > .metrics .metric').first().locator('strong').textContent();
   const before=Number((await income()).replace(/[^0-9.-]/g,''));
@@ -129,7 +132,7 @@ test('Quebec freelance cash flow stays separate from employee salary and payroll
   // Synthetic independently supplied net amount, not a self-employment tax estimate.
   await dialog.getByLabel('Amount per occurrence (CAD)',{exact:true}).fill('4000');
   await dialog.getByRole('button',{name:'Save changes'}).click();
-  await expect(page.locator('main > .metrics')).toHaveText(payrollMetrics);
+  await expect(page.locator('main > .metrics, .salary-detail-controls > .metrics')).toHaveText(payrollMetrics);
   await page.reload();
   await nav(page,'year');
   expect(Number((await income()).replace(/[^0-9.-]/g,''))).toBe(before);
@@ -148,7 +151,7 @@ test('Quebec freelance cash flow stays separate from employee salary and payroll
 test('Review setup shows saved assumptions without changing a completed plan',async({page})=>{
   await setupPlan(page);
   const saved=await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'));
-  const projection=await page.locator('main > .metrics').textContent();
+  const projection=await page.locator('main > .metrics, .salary-detail-controls > .metrics').textContent();
   expect(JSON.parse(saved).state.setup.completed).toBe(true);
   await nav(page,'more');
   const dialog=page.getByRole('dialog');
@@ -170,11 +173,11 @@ test('Review setup shows saved assumptions without changing a completed plan',as
   await nav(page,'year');
   await expect(page.locator('main')).toContainText('Taylor');
   await expect(page.locator('#app > .draft-banner')).toHaveCount(0);
-  await expect(page.locator('main > .metrics')).toHaveText(projection);
+  await expect(page.locator('main > .metrics, .salary-detail-controls > .metrics')).toHaveText(projection);
   await page.reload();
-  await expect(page.getByRole('heading',{name:'Your year, in focus.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Year'})).toBeVisible();
   await expect(page.locator('#app > .draft-banner')).toHaveCount(0);
-  await expect(page.locator('main > .metrics')).toHaveText(projection);
+  await expect(page.locator('main > .metrics, .salary-detail-controls > .metrics')).toHaveText(projection);
   expect(await page.evaluate(()=>localStorage.getItem('finance-plan-beta.v1'))).toBe(saved);
 });
 
@@ -193,7 +196,7 @@ test('debt payments disclose expense-only tracking before entry and after saving
   await dialog.getByRole('button',{name:'Save changes'}).click();
   const payment=page.locator('.item-list li').filter({hasText:'Line of credit payment'});
   await expect(payment).toContainText('$3,000 / year');
-  await expect(page.locator('main > .metrics')).toContainText('$27,000');
+  await expect(page.locator('.budget-summary .metrics')).toContainText('$27,000');
   await page.reload();await nav(page,'budget');
   await expect(notice).toContainText('Update the payment amount or end month yourself');
   await payment.getByRole('button',{name:'Edit Line of credit payment',exact:true}).click();
@@ -354,7 +357,7 @@ for(const fallback of [false,true])test(`dated backup opens a chooser after expo
 test('published subpath caches the complete app and reloads offline',async({page,context})=>{
   await setupPlan(page);await expect(page.locator('#offline-state')).toHaveText('Ready offline');
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
-  await context.setOffline(true);await page.reload();await expect(page.getByRole('heading',{name:'Your year, in focus.'})).toBeVisible();
+  await context.setOffline(true);await page.reload();await expect(page.getByRole('heading',{name:'Year'})).toBeVisible();
   await nav(page,'budget');await expect(page.locator('.item-list')).toContainText('Housing');await nav(page,'analysis');await expect(page.locator('table tbody tr')).toHaveCount(61);
   await context.setOffline(false);
 });
@@ -370,7 +373,7 @@ test('recurring extras and payday schedules change the intended unlocked months'
   await dialog.getByLabel('Start month',{exact:true}).fill('2026-01');await dialog.getByLabel('End month',{exact:true}).fill('2026-12');await dialog.getByLabel('Repeat',{exact:true}).selectOption('quarterly');
   await dialog.getByLabel('Type',{exact:true}).selectOption('loss');await dialog.getByLabel('Amount per occurrence (CAD)').fill('300');await dialog.getByLabel('Description',{exact:true}).fill('Quarterly bill');await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(page.locator('.extra')).toHaveCount(4);await page.getByRole('button',{name:'Edit extra entry 1-1',exact:true}).click();await dialog.getByLabel('Amount per occurrence (CAD)').fill('450');await dialog.getByRole('button',{name:'Save changes'}).click();await expect(page.locator('.extra').first()).toContainText('$450');
-  await page.getByRole('button',{name:'Payday schedule',exact:true}).click();await dialog.getByLabel('Taylor · pay frequency').selectOption('biweekly');await dialog.getByLabel('Taylor · first payday').fill('2026-01-02');await dialog.getByRole('button',{name:'Apply to this year'}).click();
+  await page.getByRole('button',{name:'Payday',exact:true}).click();await dialog.getByLabel('Taylor · pay frequency').selectOption('biweekly');await dialog.getByLabel('Taylor · first payday').fill('2026-01-02');await dialog.getByRole('button',{name:'Apply to this year'}).click();
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state);
   expect(saved.years[0].months[0].earning).toBeGreaterThan(saved.years[0].months[1].earning);
   await page.reload();await expect(page.locator('.extra')).toHaveCount(4);
@@ -541,20 +544,20 @@ test('imported mortgage exclusion warns until a separate payment covers spending
   await expect(page.locator('.plan-status')).toContainText('Review mortgage spending');
   await page.getByRole('button',{name:'Review Budget',exact:true}).click();
   await expect(page.locator('main .mortgage-warning')).toBeVisible();
-  await expect(page.locator('main > .metrics')).toContainText('$42,000');
-  await expect(page.locator('main > .metrics')).toContainText('$3,500');
+  await expect(page.locator('.budget-summary .metrics')).toContainText('$42,000');
+  await expect(page.locator('.budget-summary .metrics')).toContainText('$3,500');
   await page.getByRole('button',{name:'Add expense',exact:true}).click();
   await dialog.getByLabel('Expense name',{exact:true}).fill('Mortgage payment');
   await dialog.getByLabel('Category',{exact:true}).fill('Housing');
   await dialog.getByLabel('Amount per occurrence (CAD)').fill('1900');
   await dialog.getByRole('button',{name:'Save changes'}).click();
   await expect(page.locator('.mortgage-warning')).toHaveCount(0);
-  await expect(page.locator('main > .metrics')).toContainText('$64,800');
-  await expect(page.locator('main > .metrics')).toContainText('$5,400');
+  await expect(page.locator('.budget-summary .metrics')).toContainText('$64,800');
+  await expect(page.locator('.budget-summary .metrics')).toContainText('$5,400');
   await expect(page.locator('main .debt-notice')).toContainText('Debt payments are expenses only');
   await page.reload();
   await expect(page.locator('.mortgage-warning')).toHaveCount(0);
-  await expect(page.locator('main > .metrics')).toContainText('$64,800');
+  await expect(page.locator('.budget-summary .metrics')).toContainText('$64,800');
   await nav(page,'year');
   await expect(page.locator('.plan-status')).not.toContainText('Review mortgage spending');
   await expect(page.locator('main > .metrics > .metric').nth(1)).toContainText('$64,800');
@@ -638,4 +641,45 @@ test('every page, chart, table and editor fits a 360px phone',async({page},info)
     await fits();
     await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
   }
+});
+
+test('tracker controls preserve projections, filter expenses, and switch salary views',async({page})=>{
+  await setupPlan(page,{second:true});
+  await expect(page.locator('.main-nav button')).toHaveText(['Budget','Salary','Year','Invest','More']);
+  const initial=await page.locator('.wealth-hero strong').textContent();
+  await page.getByLabel('Next year',{exact:true}).click();
+  await expect(page.getByLabel('Plan year',{exact:true})).toHaveValue('2027');
+  await page.getByLabel('Previous year',{exact:true}).click();
+  await expect(page.locator('.wealth-hero strong')).toHaveText(initial);
+  await page.getByLabel('Combined opening bank balance').fill('9000');
+  await page.getByLabel('Combined opening bank balance').press('Tab');
+  await expect(page.getByLabel('Combined opening bank balance')).toHaveValue('9000');
+  await page.reload();
+  await expect(page.getByLabel('Combined opening bank balance')).toHaveValue('9000');
+  await nav(page,'budget');
+  await page.getByRole('button',{name:'+ Groceries',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByLabel('Amount per occurrence (CAD)').fill('300');
+  await dialog.getByRole('button',{name:'Save changes'}).click();
+  await page.getByRole('combobox',{name:'Category',exact:true}).selectOption('Groceries');
+  await expect(page.locator('.item-list li')).toHaveCount(1);
+  await expect(page.locator('.item-list')).toContainText('Groceries');
+  await page.getByLabel('Clear filters',{exact:true}).click();
+  await expect(page.locator('.item-list li')).toHaveCount(2);
+  await page.getByLabel('Sort by',{exact:true}).selectOption('name');
+  await expect(page.locator('.item-list li').first()).toContainText('Groceries');
+  await page.getByRole('button',{name:'Split by category',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Where it goes'})).toBeVisible();
+  await page.getByRole('button',{name:'Detailed budget',exact:true}).click();
+  await expect(page.locator('.item-list')).toBeVisible();
+  await nav(page,'salary');
+  await page.getByRole('button',{name:'Combined',exact:true}).click();
+  await expect(page.locator('.salary-tracker tbody tr').first()).toContainText('$140,000');
+  await page.getByRole('button',{name:'Biweekly pay',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Biweekly pay',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByLabel('Yearly salary growth',{exact:true}).fill('3');
+  await page.getByLabel('Yearly salary growth',{exact:true}).press('Tab');
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('finance-plan-beta.v1')).state.raiseA)).toBe(3);
+  await page.getByLabel('Edit income for 2027',{exact:true}).click();
+  await expect(dialog.getByRole('heading')).toHaveText('Income for 2027');
 });

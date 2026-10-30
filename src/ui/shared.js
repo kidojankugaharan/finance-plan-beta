@@ -12,6 +12,9 @@ export function field(key,label,value='',{type='number',min=0,max=1e9,step='any'
 export const card = (title,body,cls='') => `<section class="card ${cls}"><h2>${escape(title)}</h2>${body}</section>`;
 export const metric = (label,value,note='') => `<div class="metric"><span>${escape(label)}</span><strong>${escape(value)}</strong>${note?`<small>${escape(note)}</small>`:''}</div>`;
 export const button = (id,label,cls='secondary') => `<button type="button" id="${id}" class="${cls}">${escape(label)}</button>`;
+export const info = (label,body) => `<details class="info"><summary aria-label="About ${escape(label)}">i</summary><div class="info-body">${body}</div></details>`;
+export const heading = title => `<div class="page-heading"><h1>${escape(title)}</h1></div>`;
+export const navIcon = id => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${({budget:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M15 15h5"/>',salary:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 13h18"/>',year:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',invest:'<path d="M4 17l5-5 4 4 7-8M15 8h5v5"/>',more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'})[id]}</svg>`;
 export function listen(id,event,handler) {
   document.getElementById(id)?.addEventListener(event,async e=>{try{await handler(e);}catch(error){notify(error.message,true);}});
 }

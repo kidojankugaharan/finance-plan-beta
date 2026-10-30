@@ -58,7 +58,7 @@ export function reviewSummary(c) {
 }
 export function render(c) {
   const s=c.state;
-  if(!s.setup.started)return `<section class="welcome"><span class="eyebrow">YOUR MONEY · YOUR DEVICE</span><h1>A clearer view<br>of what comes next.</h1><p>Connect today’s budget to tomorrow’s possibilities. A private Canadian household plan, from your next paycheque to retirement.</p><div class="pills"><span>No account</span><span>Works offline</span><span>Canadian dollars</span></div>${button('start-setup','Build my plan','primary')}<p class="hint">About five minutes. You can finish later.</p>${button('welcome-import','Import a backup')}</section>`;
+  if(!s.setup.started)return `<section class="welcome"><h1>Finance Plan</h1><p>Canadian household planner</p><div class="pills"><span>No account</span><span>Works offline</span><span>Canadian dollars</span></div>${button('start-setup','Build my plan','primary')}<p class="hint">About five minutes. You can finish later.</p>${button('welcome-import','Import a backup')}</section>`;
   const step=Math.min(6,Math.max(0,s.setup.step||0));
   return `<div class="page-heading"><span class="eyebrow">SETUP · ${step+1} OF ${steps.length}</span><h1>${steps[step]}</h1></div><div class="progress" aria-label="Step ${step+1} of 7"><span style="width:${(step+1)/7*100}%"></span></div>${card(steps[step],`<form id="setup-form">${content(c,step)}<div class="form-actions">${step?'<button type="submit" name="direction" value="back" formnovalidate class="secondary">Back</button>':''}<button type="submit" name="direction" value="next">${step===6?'Open my plan':'Continue'}</button></div><button type="submit" name="direction" value="later" formnovalidate class="text-button">Save and finish later</button></form>`)}`;
 }

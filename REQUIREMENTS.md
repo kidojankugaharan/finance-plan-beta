@@ -26,3 +26,5 @@
 
 ## Out of scope (v1)
 - US/other countries, Android/iOS store builds, cloud sync, real-user analytics.
+
+Visual format and screen layout follow reference/tracker.html; changes are usability tweaks only.

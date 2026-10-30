@@ -40,7 +40,7 @@ test('household checkpoint survives an origin change and repeated full profile r
     context = await launch();
     try {
       const page = await openTesterPage(context, url, directory);
-      await expect(page.getByRole('heading', {name: 'Your year, in focus.'})).toBeVisible();
+      await expect(page.getByRole('heading', {name: 'Year'})).toBeVisible();
       await expect(page.locator('main')).toContainText('Taylor & Morgan');
       await expect(page.locator('main')).toContainText('1 closed month is hidden');
       expect(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY)).toBe(raw);
