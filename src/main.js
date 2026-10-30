@@ -46,7 +46,10 @@ function importBackup() {
     } catch(error){notify('Import failed: '+error.message,true);}
   },{once:true});
   document.body.append(input);
-  try{input.click();}catch(error){cleanup();throw error;}
+  // Request the native picker directly during the user's activation. Retain
+  // click() for browsers that do not implement the explicit picker API.
+  try{if(typeof input.showPicker==='function')input.showPicker();else input.click();}
+  catch(error){cleanup();throw error;}
 }
 function navigate(tab) {if(!tabs[tab])return;active=tab;history.replaceState(null,'','#'+tab);render();window.scrollTo(0,0);document.querySelector('h1')?.focus();}
 function update(label,edit) {store.commit(label,edit);refresh();notify(store.error||'Saved · '+label,!!store.error);}
